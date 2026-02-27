@@ -22,8 +22,18 @@ let UserService = class UserService {
     constructor(usersRepository) {
         this.usersRepository = usersRepository;
     }
-    async getUser(email, password) {
-        return this.usersRepository.findOne({ where: { email, password } }).then(user => {
+    async getOneUser(email) {
+        return this.usersRepository.findOne({ where: { email } }).then(user => {
+            if (user) {
+                return user;
+            }
+            else {
+                return 'User not found';
+            }
+        });
+    }
+    async getUser(email) {
+        return this.usersRepository.findOne({ where: { email } }).then(user => {
             if (user) {
                 return user;
             }

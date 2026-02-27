@@ -5,7 +5,8 @@ import { Repository } from 'typeorm';
 export declare class UserService {
     private usersRepository;
     constructor(usersRepository: Repository<User>);
-    getUser(email: string, password: string): Promise<string | UserResponseDto>;
+    getOneUser(email: string): Promise<string | User>;
+    getUser(email: string): Promise<string | UserResponseDto>;
     getAllUsers(): Promise<UserResponseDto[]>;
     createUser(userCreateDto: UserCreateDto): Promise<string | UserResponseDto>;
 }

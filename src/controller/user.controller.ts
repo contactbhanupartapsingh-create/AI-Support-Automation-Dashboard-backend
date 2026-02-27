@@ -1,30 +1,30 @@
-import { Controller, Get, Post } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { get } from 'http';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { UserCreateDto } from 'src/dto/userCreate.dto';
 import { UserResponseDto } from 'src/dto/userResponse.dto';
-import { User } from 'src/entity/user.entity';
+import { AuthGuard } from 'src/guards/auth.guard';
 import { UserService } from 'src/services/user.service';
-import { Repository } from 'typeorm';
 
-@Controller('user')
+@Controller('/user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
-) {}
-
-  @Get()
-  async getUser(email: string, password: string): Promise<string | UserResponseDto> {
-    return this.userService.getUser(email, password);
+  ) {}
+  
+  @Post()
+  async createUser(@Body() user: UserCreateDto): Promise<string | UserResponseDto>  {
+    return await this.userService.createUser(user);
   }
 
+  @UseGuards(AuthGuard) 
+  @Get()
+  async getUser(@Body('email') email: string): Promise<string | UserResponseDto> {
+    return this.userService.getUser(email);
+  }
+
+  @UseGuards(AuthGuard)
   @Get('all')
   async getAllUsers(): Promise<UserResponseDto[]> {
     return this.userService.getAllUsers();
   }
 
-  @Post()
-  createUser(userCreateDto: UserCreateDto): Promise<string | UserResponseDto>  {
-    return this.userService.createUser(userCreateDto);
-  }
 }

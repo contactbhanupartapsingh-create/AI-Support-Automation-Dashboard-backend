@@ -13,7 +13,13 @@ const app_service_1 = require("./app.service");
 const typeorm_module_1 = require("@nestjs/typeorm/dist/typeorm.module");
 const config_1 = require("@nestjs/config");
 const user_entity_1 = require("./entity/user.entity");
+const user_module_1 = require("./modules/user.module");
+const logger_middleware_1 = require("./middleware/logger.middleware");
+const auth_module_1 = require("./modules/auth.module");
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
+    }
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
@@ -21,6 +27,7 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({
                 envFilePath: '.development.env',
+                isGlobal: true,
             }),
             typeorm_module_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
@@ -36,7 +43,9 @@ exports.AppModule = AppModule = __decorate([
                     autoLoadEntities: true,
                     synchronize: true,
                 }),
-            })
+            }),
+            user_module_1.UserModule,
+            auth_module_1.AuthModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

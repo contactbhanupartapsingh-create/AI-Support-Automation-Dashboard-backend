@@ -10,15 +10,28 @@ export class UserService {
 constructor( 
     @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
+  
+  
+  // ******************************internal function used by other services*************************
+  async getOneUser(email: string): Promise<string | User> {
+  return this.usersRepository.findOne({ where: { email } }).then(user => {
+    if (user) {
+      return user;
+    } else {
+      return 'User not found';
+    }
+  })}
 
-  async getUser(email: string, password: string): Promise<string | UserResponseDto> {
-    return this.usersRepository.findOne({ where: { email, password } }).then(user => {
+  // **********************external function used by user controller*************************
+  async getUser(email: string): Promise<string | UserResponseDto> {
+    return this.usersRepository.findOne({ where: { email } }).then(user => {
       if (user) {
         return user;
       } else {
         return 'User not found';
       }
     })}
+
 
     async getAllUsers(): Promise<UserResponseDto[]> {
         return this.usersRepository.find();

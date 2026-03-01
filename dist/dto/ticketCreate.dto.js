@@ -9,31 +9,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserCreateDto = void 0;
+exports.TicketCreateDto = void 0;
 const class_validator_1 = require("class-validator");
-class UserCreateDto {
-    firstName;
-    lastName;
-    email;
-    password;
+const static_1 = require("../static");
+class TicketCreateDto {
+    title;
+    description;
+    status;
 }
-exports.UserCreateDto = UserCreateDto;
+exports.TicketCreateDto = TicketCreateDto;
 __decorate([
     (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UserCreateDto.prototype, "firstName", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UserCreateDto.prototype, "lastName", void 0);
-__decorate([
-    (0, class_validator_1.IsEmail)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], UserCreateDto.prototype, "email", void 0);
+], TicketCreateDto.prototype, "title", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UserCreateDto.prototype, "password", void 0);
-//# sourceMappingURL=userCreate.dto.js.map
+], TicketCreateDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(static_1.TicketStatus),
+    __metadata("design:type", String)
+], TicketCreateDto.prototype, "status", void 0);
+//# sourceMappingURL=ticketCreate.dto.js.map

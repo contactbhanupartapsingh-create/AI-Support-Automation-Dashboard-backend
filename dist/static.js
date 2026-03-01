@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TicketStatus = exports.HttpStatus = void 0;
+exports.deleteType = exports.TicketStatus = exports.HttpStatus = void 0;
 var HttpStatus;
 (function (HttpStatus) {
     HttpStatus[HttpStatus["OK"] = 200] = "OK";
@@ -20,4 +20,9 @@ var TicketStatus;
     TicketStatus["RESOLVED"] = "resolved";
     TicketStatus["CLOSED"] = "closed";
 })(TicketStatus || (exports.TicketStatus = TicketStatus = {}));
+var deleteType;
+(function (deleteType) {
+    deleteType["hard"] = "hard_delete";
+    deleteType["soft"] = "soft_delete";
+})(deleteType || (exports.deleteType = deleteType = {}));
 //# sourceMappingURL=static.js.map

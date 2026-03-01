@@ -9,31 +9,22 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserCreateDto = void 0;
+exports.TicketDeleteDto = void 0;
 const class_validator_1 = require("class-validator");
-class UserCreateDto {
-    firstName;
-    lastName;
-    email;
-    password;
+const static_1 = require("../static");
+class TicketDeleteDto {
+    id;
+    type = static_1.deleteType.soft;
 }
-exports.UserCreateDto = UserCreateDto;
+exports.TicketDeleteDto = TicketDeleteDto;
 __decorate([
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UserCreateDto.prototype, "firstName", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UserCreateDto.prototype, "lastName", void 0);
-__decorate([
-    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], UserCreateDto.prototype, "email", void 0);
+    __metadata("design:type", Number)
+], TicketDeleteDto.prototype, "id", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(static_1.deleteType),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], UserCreateDto.prototype, "password", void 0);
-//# sourceMappingURL=userCreate.dto.js.map
+], TicketDeleteDto.prototype, "type", void 0);
+//# sourceMappingURL=ticketDelete.dto.js.map

@@ -16,3 +16,8 @@ export enum TicketStatus {
     RESOLVED = 'resolved',
     CLOSED = 'closed',
 }
+
+export enum deleteType {
+    hard='hard_delete',
+    soft='soft_delete'
+}

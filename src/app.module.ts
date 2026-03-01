@@ -8,6 +8,7 @@ import { UserModule } from './modules/user.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AuthModule } from './modules/auth.module';
 import { Ticket } from './entity/ticket.entity';
+import { TicketModule } from './modules/ticket.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Ticket } from './entity/ticket.entity';
     }),
     UserModule,
     AuthModule,
+    TicketModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -18,7 +18,7 @@ export class AuthService {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND); 
       }
       if(user.password === data.password){
-        const payload = { email: data.email, sub: data.id };
+        const payload = {...data}
         const accessToken = await this.jwtService.signAsync(payload);
         return { accessToken };
 

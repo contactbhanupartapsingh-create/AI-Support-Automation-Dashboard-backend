@@ -14,32 +14,89 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TicketController = void 0;
 const common_1 = require("@nestjs/common");
+const ticketCreate_dto_1 = require("../dto/ticketCreate.dto");
+const user_entity_1 = require("../entity/user.entity");
 const ticket_service_1 = require("../services/ticket.service");
 const static_1 = require("../static");
+const user_decorator_1 = require("../decorators/user.decorator");
+const ticketChangeStatus_dto_1 = require("../dto/ticketChangeStatus.dto");
+const ticketDelete_dto_1 = require("../dto/ticketDelete.dto");
+const auth_guard_1 = require("../guards/auth.guard");
+const ticket_decorator_1 = require("../decorators/ticket.decorator");
 let TicketController = class TicketController {
     ticketService;
     constructor(ticketService) {
         this.ticketService = ticketService;
     }
-    async getAllTickets(req) {
-        const user = req.user;
-        await this.ticketService.getAllTicketsByUser(user).then((data) => {
-            return data;
-        }).catch((err) => {
+    async getAllTickets(user) {
+        try {
+            return await this.ticketService.getAllTicketsByUser(user);
+        }
+        catch (err) {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
-        });
+        }
+    }
+    async createTicket(user, ticketData) {
+        try {
+            return await this.ticketService.createTicketForUser(user, ticketData);
+        }
+        catch (err) {
+            throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async changeStatus(userId, ticketData) {
+        try {
+            return await this.ticketService.changeTicketStatus(userId, ticketData);
+        }
+        catch (err) {
+            throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async deleteTicket(userId, deleteData) {
+        try {
+            console.log(deleteData, '1345252');
+            return await this.ticketService.deleteTicket(userId, deleteData);
+        }
+        catch (err) {
+            throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 };
 exports.TicketController = TicketController;
 __decorate([
     (0, common_1.Get)('all'),
-    __param(0, (0, common_1.Req)()),
+    __param(0, (0, user_decorator_1.UserDecorator)('user')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [user_entity_1.User]),
     __metadata("design:returntype", Promise)
 ], TicketController.prototype, "getAllTickets", null);
+__decorate([
+    (0, common_1.Post)('create'),
+    __param(0, (0, user_decorator_1.UserDecorator)('user')),
+    __param(1, (0, ticket_decorator_1.TicketDecorator)('body')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.User, ticketCreate_dto_1.TicketCreateDto]),
+    __metadata("design:returntype", Promise)
+], TicketController.prototype, "createTicket", null);
+__decorate([
+    (0, common_1.Patch)('updateStatus'),
+    __param(0, (0, user_decorator_1.UserDecorator)('id')),
+    __param(1, (0, ticket_decorator_1.TicketDecorator)('body')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, ticketChangeStatus_dto_1.TicketChangeStatusDto]),
+    __metadata("design:returntype", Promise)
+], TicketController.prototype, "changeStatus", null);
+__decorate([
+    (0, common_1.Delete)('delete'),
+    __param(0, (0, user_decorator_1.UserDecorator)('id')),
+    __param(1, (0, ticket_decorator_1.TicketDecorator)('body')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, ticketDelete_dto_1.TicketDeleteDto]),
+    __metadata("design:returntype", Promise)
+], TicketController.prototype, "deleteTicket", null);
 exports.TicketController = TicketController = __decorate([
-    (0, common_1.Controller)('ticket'),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.Controller)('/ticket'),
     __metadata("design:paramtypes", [ticket_service_1.TicketService])
 ], TicketController);
 //# sourceMappingURL=ticket.controller.js.map

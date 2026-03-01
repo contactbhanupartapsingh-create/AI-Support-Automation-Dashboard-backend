@@ -31,6 +31,65 @@ let TicketService = class TicketService {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
         });
     }
+    async createTicketForUser(user, ticketData) {
+        const newTicket = this.ticketRepository.create({
+            ...ticketData,
+            user: user
+        });
+        try {
+            return await this.ticketRepository.save(newTicket);
+        }
+        catch (err) {
+            throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async changeTicketStatus(userId, ticketData) {
+        try {
+            const { id, status } = ticketData;
+            const ticket = await this.ticketRepository.findOne({
+                where: { id },
+                relations: ['user']
+            });
+            if (!ticket)
+                throw new common_1.HttpException(`ticket id: ${id}not found`, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            if (ticket.user.id != userId)
+                throw new common_1.HttpException(` user not authorized to access this ticket`, static_1.HttpStatus.UNAUTHORIZED);
+            ticket.status = status;
+            this.ticketRepository.save(ticket);
+            return ticket;
+        }
+        catch (err) {
+            throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async deleteTicket(userId, ticketDeleteData) {
+        try {
+            const { id, type } = ticketDeleteData;
+            const ticket = await this.ticketRepository.findOne({
+                where: { id },
+                relations: ['user']
+            });
+            if (!ticket)
+                throw new common_1.HttpException(`ticket id: ${id}not found`, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            if (ticket.user.id != userId)
+                throw new common_1.HttpException(`User is not authorized to access this ticket`, static_1.HttpStatus.UNAUTHORIZED);
+            if (type == static_1.deleteType.soft) {
+                ticket.isDeleted = true;
+                if (ticket) {
+                    this.ticketRepository.save(ticket);
+                    return ticket;
+                }
+                throw new common_1.HttpException(`ticket id: ${id}not found or user not authorized`, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            else {
+                this.ticketRepository.remove(ticket);
+                return ticket;
+            }
+        }
+        catch (err) {
+            throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 };
 exports.TicketService = TicketService;
 __decorate([

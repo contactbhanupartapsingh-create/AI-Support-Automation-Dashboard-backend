@@ -18,6 +18,7 @@ let Ticket = class Ticket {
     title;
     description;
     status;
+    isDeleted;
     user;
     createdAt;
     updatedAt;
@@ -36,9 +37,15 @@ __decorate([
     __metadata("design:type", String)
 ], Ticket.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ default: static_1.TicketStatus.OPEN }),
     __metadata("design:type", String)
 ], Ticket.prototype, "status", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        default: false
+    }),
+    __metadata("design:type", Boolean)
+], Ticket.prototype, "isDeleted", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User, user => user.tickets),
     __metadata("design:type", user_entity_1.User)

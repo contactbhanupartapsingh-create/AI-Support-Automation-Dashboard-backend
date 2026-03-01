@@ -17,6 +17,7 @@ const user_module_1 = require("./modules/user.module");
 const logger_middleware_1 = require("./middleware/logger.middleware");
 const auth_module_1 = require("./modules/auth.module");
 const ticket_entity_1 = require("./entity/ticket.entity");
+const ticket_module_1 = require("./modules/ticket.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
@@ -47,6 +48,7 @@ exports.AppModule = AppModule = __decorate([
             }),
             user_module_1.UserModule,
             auth_module_1.AuthModule,
+            ticket_module_1.TicketModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

@@ -5,6 +5,7 @@ export declare class Ticket {
     title: string;
     description: string;
     status: TicketStatus;
+    isDeleted: boolean;
     user: User;
     createdAt: Date;
     updatedAt: Date;

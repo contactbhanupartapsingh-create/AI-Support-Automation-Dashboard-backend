@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteType = exports.TicketStatus = exports.HttpStatus = void 0;
+exports.UserRoles = exports.deleteType = exports.TicketStatus = exports.HttpStatus = void 0;
 var HttpStatus;
 (function (HttpStatus) {
     HttpStatus[HttpStatus["OK"] = 200] = "OK";
@@ -25,4 +25,9 @@ var deleteType;
     deleteType["hard"] = "hard_delete";
     deleteType["soft"] = "soft_delete";
 })(deleteType || (exports.deleteType = deleteType = {}));
+var UserRoles;
+(function (UserRoles) {
+    UserRoles["USER"] = "user";
+    UserRoles["ADMIN"] = "admin";
+})(UserRoles || (exports.UserRoles = UserRoles = {}));
 //# sourceMappingURL=static.js.map

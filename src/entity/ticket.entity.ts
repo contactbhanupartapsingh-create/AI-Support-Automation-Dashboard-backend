@@ -1,7 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, DeleteDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { TicketStatus } from 'src/static';
-import { Transform } from 'class-transformer';
 
 @Entity()
 export class Ticket {
@@ -17,17 +16,15 @@ export class Ticket {
   @Column({default: TicketStatus.OPEN})
   status: TicketStatus;
   
-  @Column({
-    default: false
-  })
-  isDeleted: boolean;
-
   @ManyToOne(() => User, user => user.tickets)
   user: User;
-
+  
   @CreateDateColumn({type:'timestamptz'})
   createdAt: Date
 
   @CreateDateColumn({type:'timestamptz'})
   updatedAt: Date
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

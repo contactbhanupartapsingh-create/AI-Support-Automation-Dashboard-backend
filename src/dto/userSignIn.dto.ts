@@ -1,6 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, isInt, IsNumber, isNumber, IsString } from 'class-validator';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { IsEmail, IsString } from 'class-validator';
 
 export class UserSignInDto {
   @IsEmail()

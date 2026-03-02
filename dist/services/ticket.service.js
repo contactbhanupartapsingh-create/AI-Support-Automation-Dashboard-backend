@@ -62,7 +62,7 @@ let TicketService = class TicketService {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    async deleteTicket(userId, ticketDeleteData) {
+    async deleteTicket(userId, role, ticketDeleteData) {
         try {
             const { id, type } = ticketDeleteData;
             const ticket = await this.ticketRepository.findOne({
@@ -70,21 +70,34 @@ let TicketService = class TicketService {
                 relations: ['user']
             });
             if (!ticket)
-                throw new common_1.HttpException(`ticket id: ${id}not found`, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+                throw new common_1.HttpException(`ticket id: ${id} not found`, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
             if (ticket.user.id != userId)
                 throw new common_1.HttpException(`User is not authorized to access this ticket`, static_1.HttpStatus.UNAUTHORIZED);
             if (type == static_1.deleteType.soft) {
-                ticket.isDeleted = true;
-                if (ticket) {
-                    this.ticketRepository.save(ticket);
-                    return ticket;
-                }
-                throw new common_1.HttpException(`ticket id: ${id}not found or user not authorized`, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+                return await this.ticketRepository.softRemove(ticket);
             }
             else {
-                this.ticketRepository.remove(ticket);
-                return ticket;
+                if (role == static_1.UserRoles.ADMIN) {
+                    this.ticketRepository.remove(ticket);
+                    return ticket;
+                }
+                throw new common_1.HttpException(`role type ${role} is not authorized for this type of action`, static_1.HttpStatus.UNAUTHORIZED);
             }
+        }
+        catch (err) {
+            throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async restoreTicket(ticketId) {
+        try {
+            const restoreResult = await this.ticketRepository.restore({
+                id: ticketId,
+                deletedAt: (0, typeorm_2.Not)((0, typeorm_2.IsNull)())
+            });
+            if (restoreResult.affected == 0) {
+                throw new common_1.NotFoundException(`Ticket with id : ${ticketId} not found or not deleted or already restored`);
+            }
+            return await this.ticketRepository.findOneBy({ id: ticketId });
         }
         catch (err) {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);

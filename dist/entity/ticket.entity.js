@@ -18,10 +18,10 @@ let Ticket = class Ticket {
     title;
     description;
     status;
-    isDeleted;
     user;
     createdAt;
     updatedAt;
+    deletedAt;
 };
 exports.Ticket = Ticket;
 __decorate([
@@ -41,12 +41,6 @@ __decorate([
     __metadata("design:type", String)
 ], Ticket.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({
-        default: false
-    }),
-    __metadata("design:type", Boolean)
-], Ticket.prototype, "isDeleted", void 0);
-__decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User, user => user.tickets),
     __metadata("design:type", user_entity_1.User)
 ], Ticket.prototype, "user", void 0);
@@ -58,6 +52,10 @@ __decorate([
     (0, typeorm_1.CreateDateColumn)({ type: 'timestamptz' }),
     __metadata("design:type", Date)
 ], Ticket.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", Date)
+], Ticket.prototype, "deletedAt", void 0);
 exports.Ticket = Ticket = __decorate([
     (0, typeorm_1.Entity)()
 ], Ticket);

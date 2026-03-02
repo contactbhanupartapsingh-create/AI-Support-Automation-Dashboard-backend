@@ -19,3 +19,7 @@ export declare enum deleteType {
     hard = "hard_delete",
     soft = "soft_delete"
 }
+export declare enum UserRoles {
+    USER = "user",
+    ADMIN = "admin"
+}

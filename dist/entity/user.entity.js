@@ -12,12 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
 const ticket_entity_1 = require("./ticket.entity");
+const static_1 = require("../static");
 let User = class User {
     id;
     firstName;
     lastName;
     email;
     password;
+    role;
     tickets;
 };
 exports.User = User;
@@ -41,6 +43,14 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: "enum",
+        enum: static_1.UserRoles,
+        default: static_1.UserRoles.USER
+    }),
+    __metadata("design:type", String)
+], User.prototype, "role", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => ticket_entity_1.Ticket, ticket => ticket.user),
     __metadata("design:type", Array)

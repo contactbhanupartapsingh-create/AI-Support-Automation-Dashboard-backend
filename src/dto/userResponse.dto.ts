@@ -1,7 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { IsEmail, isInt, IsNumber, isNumber, IsString } from 'class-validator';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { IsEmail, IsEnum, IsNumber, IsString } from 'class-validator';
+import { UserRoles } from 'src/static';
 
 export class UserResponseDto {
   @IsNumber()
@@ -15,6 +14,9 @@ export class UserResponseDto {
 
   @IsEmail()
   email: string;
+
+  @IsEnum(UserRoles)
+  role: UserRoles;
 
   @Exclude()
   password?: string;

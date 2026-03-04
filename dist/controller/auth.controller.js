@@ -14,12 +14,19 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
+const userCreate_dto_1 = require("../dto/userCreate.dto");
 const userSignIn_dto_1 = require("../dto/userSignIn.dto");
 const auth_service_1 = require("../services/auth.service");
+const user_service_1 = require("../services/user.service");
 let AuthController = class AuthController {
     AuthService;
-    constructor(AuthService) {
+    UserService;
+    constructor(AuthService, UserService) {
         this.AuthService = AuthService;
+        this.UserService = UserService;
+    }
+    async createUser(user) {
+        return await this.UserService.createUser(user);
     }
     async getUser(user) {
         return this.AuthService.logIn(user).then((response) => {
@@ -31,6 +38,13 @@ let AuthController = class AuthController {
 };
 exports.AuthController = AuthController;
 __decorate([
+    (0, common_1.Post)('register'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [userCreate_dto_1.UserCreateDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "createUser", null);
+__decorate([
     (0, common_1.Post)('login'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -39,6 +53,7 @@ __decorate([
 ], AuthController.prototype, "getUser", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
-    __metadata("design:paramtypes", [auth_service_1.AuthService])
+    __metadata("design:paramtypes", [auth_service_1.AuthService,
+        user_service_1.UserService])
 ], AuthController);
 //# sourceMappingURL=auth.controller.js.map

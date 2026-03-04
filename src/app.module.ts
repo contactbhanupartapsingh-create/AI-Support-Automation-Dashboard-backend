@@ -9,6 +9,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AuthModule } from './modules/auth.module';
 import { Ticket } from './entity/ticket.entity';
 import { TicketModule } from './modules/ticket.module';
+import { RouterModule } from '@nestjs/core';
 
 @Module({
   imports: [

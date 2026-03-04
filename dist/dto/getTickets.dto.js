@@ -9,15 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TicketDeleteDto = void 0;
-const class_validator_1 = require("class-validator");
-class TicketDeleteDto {
-    id;
+exports.GetTicketsDto = void 0;
+const class_transformer_1 = require("class-transformer");
+class GetTicketsDto {
+    getDeleted;
 }
-exports.TicketDeleteDto = TicketDeleteDto;
+exports.GetTicketsDto = GetTicketsDto;
 __decorate([
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", Number)
-], TicketDeleteDto.prototype, "id", void 0);
-//# sourceMappingURL=ticketDelete.dto.js.map
+    (0, class_transformer_1.Type)(() => Boolean),
+    __metadata("design:type", Boolean)
+], GetTicketsDto.prototype, "getDeleted", void 0);
+//# sourceMappingURL=getTickets.dto.js.map

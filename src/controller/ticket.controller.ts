@@ -1,27 +1,33 @@
-import { Body, Controller, Delete, Get, HttpException, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, HttpException, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { TicketCreateDto } from 'src/dto/ticketCreate.dto';
 import { Ticket } from 'src/entity/ticket.entity';
 import { User } from 'src/entity/user.entity';
 import { TicketService } from 'src/services/ticket.service';
-import { HttpStatus, UserRoles } from 'src/static';
+import { HttpStatus } from 'src/static';
 import { UserDecorator } from 'src/decorators/user.decorator';
 import { TicketChangeStatusDto } from 'src/dto/ticketChangeStatus.dto';
 import { TicketDeleteDto } from 'src/dto/ticketDelete.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { TicketDecorator } from 'src/decorators/ticket.decorator';
-import { TicketRestoreDto } from 'src/dto/ticketRestore.dto';
-import { RoleGuard } from 'src/guards/role.guard';
-import { Roles } from 'src/decorators/roles.decorator';
 
-@UseGuards(AuthGuard, RoleGuard)
+@UseGuards(AuthGuard)
 @Controller('/ticket')
 export class TicketController {
     constructor(private readonly ticketService: TicketService) {}
 
-  @Get('all')
-  async getAllTickets(@UserDecorator(['user']) user: User): Promise<Ticket[]> {
+  @Get()
+  async getUserTickets(@UserDecorator(['user']) user: User): Promise<Ticket[]> {
     try {
-        return await this.ticketService.getAllTicketsByUser(user)
+        return await this.ticketService.getUserTickets(user)
+    }catch(err){
+        throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Get('trash')
+  async getTrashTicketsByUser(@UserDecorator(['user']) user: User): Promise<Ticket[]> {
+    try {
+        return await this.ticketService.getUserTickets(user, true)
     }catch(err){
         throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -46,20 +52,10 @@ export class TicketController {
   }
 
   @Delete('delete')
-  async deleteTicket(@UserDecorator(['id', 'role']) userData : {id:number, role:UserRoles},@TicketDecorator('body') deleteData: TicketDeleteDto) : Promise<Ticket> {
+  async deleteTicket(@UserDecorator(['id']) userData : {id:number},@TicketDecorator('body') deleteData: TicketDeleteDto) : Promise<Ticket> {
     try{
-      const {id:userId, role} = userData
-      return await this.ticketService.deleteTicket(userId, role, deleteData)
-    }catch(err){
-      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  @Patch('restore')
-  @Roles(UserRoles.ADMIN)
-  async restoreTicket(@TicketDecorator('body') restoreData: TicketRestoreDto) : Promise<Ticket | null>{
-    try{
-      return await this.ticketService.restoreTicket(restoreData.id)
+      const {id:userId} = userData
+      return await this.ticketService.deleteTicket( userId, deleteData)
     }catch(err){
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }

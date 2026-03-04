@@ -23,17 +23,22 @@ const ticketChangeStatus_dto_1 = require("../dto/ticketChangeStatus.dto");
 const ticketDelete_dto_1 = require("../dto/ticketDelete.dto");
 const auth_guard_1 = require("../guards/auth.guard");
 const ticket_decorator_1 = require("../decorators/ticket.decorator");
-const ticketRestore_dto_1 = require("../dto/ticketRestore.dto");
-const role_guard_1 = require("../guards/role.guard");
-const roles_decorator_1 = require("../decorators/roles.decorator");
 let TicketController = class TicketController {
     ticketService;
     constructor(ticketService) {
         this.ticketService = ticketService;
     }
-    async getAllTickets(user) {
+    async getUserTickets(user) {
         try {
-            return await this.ticketService.getAllTicketsByUser(user);
+            return await this.ticketService.getUserTickets(user);
+        }
+        catch (err) {
+            throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async getTrashTicketsByUser(user) {
+        try {
+            return await this.ticketService.getUserTickets(user, true);
         }
         catch (err) {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
@@ -57,16 +62,8 @@ let TicketController = class TicketController {
     }
     async deleteTicket(userData, deleteData) {
         try {
-            const { id: userId, role } = userData;
-            return await this.ticketService.deleteTicket(userId, role, deleteData);
-        }
-        catch (err) {
-            throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-    async restoreTicket(restoreData) {
-        try {
-            return await this.ticketService.restoreTicket(restoreData.id);
+            const { id: userId } = userData;
+            return await this.ticketService.deleteTicket(userId, deleteData);
         }
         catch (err) {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
@@ -75,12 +72,19 @@ let TicketController = class TicketController {
 };
 exports.TicketController = TicketController;
 __decorate([
-    (0, common_1.Get)('all'),
+    (0, common_1.Get)(),
     __param(0, (0, user_decorator_1.UserDecorator)(['user'])),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [user_entity_1.User]),
     __metadata("design:returntype", Promise)
-], TicketController.prototype, "getAllTickets", null);
+], TicketController.prototype, "getUserTickets", null);
+__decorate([
+    (0, common_1.Get)('trash'),
+    __param(0, (0, user_decorator_1.UserDecorator)(['user'])),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.User]),
+    __metadata("design:returntype", Promise)
+], TicketController.prototype, "getTrashTicketsByUser", null);
 __decorate([
     (0, common_1.Post)('create'),
     __param(0, (0, user_decorator_1.UserDecorator)(['user'])),
@@ -99,22 +103,14 @@ __decorate([
 ], TicketController.prototype, "changeStatus", null);
 __decorate([
     (0, common_1.Delete)('delete'),
-    __param(0, (0, user_decorator_1.UserDecorator)(['id', 'role'])),
+    __param(0, (0, user_decorator_1.UserDecorator)(['id'])),
     __param(1, (0, ticket_decorator_1.TicketDecorator)('body')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, ticketDelete_dto_1.TicketDeleteDto]),
     __metadata("design:returntype", Promise)
 ], TicketController.prototype, "deleteTicket", null);
-__decorate([
-    (0, common_1.Patch)('restore'),
-    (0, roles_decorator_1.Roles)(static_1.UserRoles.ADMIN),
-    __param(0, (0, ticket_decorator_1.TicketDecorator)('body')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [ticketRestore_dto_1.TicketRestoreDto]),
-    __metadata("design:returntype", Promise)
-], TicketController.prototype, "restoreTicket", null);
 exports.TicketController = TicketController = __decorate([
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, role_guard_1.RoleGuard),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     (0, common_1.Controller)('/ticket'),
     __metadata("design:paramtypes", [ticket_service_1.TicketService])
 ], TicketController);

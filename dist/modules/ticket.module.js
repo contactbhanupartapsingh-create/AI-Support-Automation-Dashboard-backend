@@ -9,7 +9,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TicketModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const ticket_controller_1 = require("../controller/ticket.controller");
+const ticket_controller_1 = require("../adminContoller/ticket.controller");
+const ticket_controller_2 = require("../controller/ticket.controller");
 const ticket_entity_1 = require("../entity/ticket.entity");
 const ticket_service_1 = require("../services/ticket.service");
 let TicketModule = class TicketModule {
@@ -18,7 +19,7 @@ exports.TicketModule = TicketModule;
 exports.TicketModule = TicketModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([ticket_entity_1.Ticket])],
-        controllers: [ticket_controller_1.TicketController],
+        controllers: [ticket_controller_2.TicketController, ticket_controller_1.AdminTicketController],
         providers: [ticket_service_1.TicketService]
     })
 ], TicketModule);

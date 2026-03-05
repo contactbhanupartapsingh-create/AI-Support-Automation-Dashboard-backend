@@ -8,14 +8,14 @@ This system manages user authentication, role-based access control (RBAC), and s
 
 ## 🚀 Core Features
 
-- 🔐 JWT-based Authentication (Register / Login)
-- 👥 Role-Based Access Control (Admin / User)
-- 🎫 Ticket Management System
-- ♻️ Soft Delete with Restore Capability
-- ❌ Hard Delete (Admin Only)
-- 🛡 Custom Guards & Decorators
-- 📦 DTO Validation & Structured Responses
-- ⚠️ HTTP Exception Handling
+- 🔐 JWT-based Authentication – Secure Register/Login flow.
+- 👥 Role-Based Access Control – Granular Admin/User permissions.
+- 🎫 Ticket Lifecycle Management – Full CRUD with status transitions.
+- ♻️ Data Governance – Soft delete for safety, hard delete for Admin cleanup.
+- 🛡 Custom Param Decorators – Specialized decorators for @GetUser(), @GetPagination(), and @Roles().
+- 📦 Smart Pagination & Filtering – Unified DTO-based query handling with limit, offset, and status filters.
+- 📜 Logger Middleware – Global interceptor for auditing HTTP requests and monitoring API latency.
+- ⚠️ Standardized Responses – Unified HTTP Exception handling and structured JSON responses.
 - 🗂 Modular and Scalable Architecture
 
 ---
@@ -59,12 +59,31 @@ This architecture simulates real-world enterprise-level access control and data 
 - `POST /auth/login`
 
 ### Ticket Routes
-- `GET /tickets`
+- `GET /tickets` (current user tickets)
 - `POST /tickets`
-- `PATCH /tickets/:id`
-- `DELETE /tickets/:id` (Soft Delete)
-- `PATCH /tickets/:id/restore` (Admin Only)
-- `DELETE /tickets/:id/hard` (Admin Only)
+- `PATCH /tickets/updateStatus`
+- `DELETE /tickets` (Soft Delete)
+
+### Ticket Admin Routes
+- `GET /tickets/all` (all user tickets)
+- `PATCH /tickets/restore` 
+- `DELETE /tickets` (soft and hard delete)
+
+---
+
+## 🚀 Live API Testing (Postman)
+
+We provide a public Postman collection to help you explore and test the API endpoints without manual configuration.
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://contactbhanupartapsingh-5069762.postman.co/workspace/Bhanu-Partap-Singh's-Workspace~b3de8cf4-e054-41d0-8bd7-8d81aee84061/collection/52729728-6b4a9e68-3ea1-4fdf-a1b8-fcfd3ce37d81?action=share&creator=52729728)
+
+### 🛠 How to use:
+1. **Fork the Collection:** Click the button above and select "Fork" to move it to your own Postman workspace.
+2. **Set Environment Variables:** - Set `baseUrl` to `http://localhost:3000` (or your hosted URL).
+3. **Authentication Flow:**
+   - Use the `Register` endpoint to create a user.
+   - Use `Login` to receive a **JWT Access Token**.
+   - Copy the token and paste it into the **Collection Authorization** tab (Type: Bearer Token). This will automatically authorize all other requests.
 
 ---
 

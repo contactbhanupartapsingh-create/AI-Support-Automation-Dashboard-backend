@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserCreateDto } from 'src/dto/userCreate.dto';
 import { UserResponseDto } from 'src/dto/userResponse.dto';
 import { User } from 'src/entity/user.entity';
+import { UserRoles } from 'src/static';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -42,7 +43,7 @@ constructor(
         if (existingUser) {
           return 'User already exists';
         }
-        const newUser = this.usersRepository.create(userCreateDto);
+        const newUser = this.usersRepository.create({...userCreateDto, role: UserRoles.USER});
         return this.usersRepository.save(newUser);
     }
 }

@@ -7,6 +7,9 @@ import { User } from './entity/user.entity';
 import { UserModule } from './modules/user.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AuthModule } from './modules/auth.module';
+import { Ticket } from './entity/ticket.entity';
+import { TicketModule } from './modules/ticket.module';
+import { RouterModule } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -18,7 +21,7 @@ import { AuthModule } from './modules/auth.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        entities: [User],
+        entities: [User, Ticket],
         type: 'postgres', 
         host: configService.get<string>('DB_HOST'),
         port: configService.get<number>('DB_PORT'),
@@ -31,6 +34,7 @@ import { AuthModule } from './modules/auth.module';
     }),
     UserModule,
     AuthModule,
+    TicketModule
   ],
   controllers: [AppController],
   providers: [AppService],

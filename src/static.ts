@@ -9,3 +9,26 @@ export enum HttpStatus {
     NOT_FOUND = 404,
     INTERNAL_SERVER_ERROR = 500,
 }
+
+export enum TicketStatus {
+    OPEN = 'open',
+    IN_PROGRESS = 'in_progress',
+    RESOLVED = 'resolved',
+    CLOSED = 'closed',
+}
+
+export enum deleteType {
+    hard='hard_delete',
+    soft='soft_delete'
+}
+
+export enum UserRoles {
+    USER='user',
+    ADMIN='admin'
+}
+
+export type PaginationMeta = {
+    totalItems: number,
+    totalPages: number,
+    currentPage: number
+}

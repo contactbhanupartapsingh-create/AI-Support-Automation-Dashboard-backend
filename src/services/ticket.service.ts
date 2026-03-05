@@ -10,14 +10,21 @@ import { TicketDeleteDto } from 'src/dto/ticketDelete.dto';
 import { TicketDeleteAdminDto } from 'src/dto/ticketDeleteAdmin.dto';
 import { PaginationQueryDto } from 'src/dto/paginationQuery.dto';
 import { TicketResponseDto } from 'src/dto/getTicketResponse.dto';
+import { FilterQueryDto } from 'src/dto/filterQuery.dto';
 
 @Injectable()
 export class TicketService {
   @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>
 
 
-  async getUserTickets(user: User, paginationQuery, getDeleted: boolean = false): Promise<TicketResponseDto> {
+  async getUserTickets(
+    user: User, 
+    paginationQuery: PaginationQueryDto, 
+    filters: FilterQueryDto
+  ): Promise<TicketResponseDto> {
     const {skip, limit, page } = paginationQuery
+    const {status} = filters
+    const getDeleted = true
     return await this.ticketRepository.findAndCount({
       where: {
         user: { id: user.id },
@@ -27,6 +34,7 @@ export class TicketService {
       relations: {
         user: true
       },
+      ...(status && {status}),
       take: limit,
       skip
     }).then(async (data) => {
@@ -101,13 +109,15 @@ export class TicketService {
 
   //**********************************************admin logic******************************************** */
 
-  async getAllTickets(getDeleted: boolean, paginationQuery: PaginationQueryDto): Promise<TicketResponseDto> {
+  async getAllTickets(filters: FilterQueryDto, paginationQuery: PaginationQueryDto): Promise<TicketResponseDto> {
     const { page, limit, skip } = paginationQuery
+    const {getDeleted, status} = filters
     try {
       const tickets = await this.ticketRepository.findAndCount({
         take: limit,
         skip,
         withDeleted: getDeleted,
+        ...(status && {status}),
         order: {
           createdAt: 'DESC'
         }

@@ -27,8 +27,7 @@ let AuthService = class AuthService {
                 throw new common_1.HttpException('User not found', static_1.HttpStatus.NOT_FOUND);
             }
             if (user.password === data.password) {
-                const payload = { email: data.email, sub: data.id };
-                const accessToken = await this.jwtService.signAsync(payload);
+                const accessToken = await this.jwtService.signAsync({ ...data });
                 return { accessToken };
             }
             throw new common_1.HttpException('Invalid password', static_1.HttpStatus.UNAUTHORIZED);

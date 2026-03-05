@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HttpStatus = void 0;
+exports.UserRoles = exports.deleteType = exports.TicketStatus = exports.HttpStatus = void 0;
 var HttpStatus;
 (function (HttpStatus) {
     HttpStatus[HttpStatus["OK"] = 200] = "OK";
@@ -13,4 +13,21 @@ var HttpStatus;
     HttpStatus[HttpStatus["NOT_FOUND"] = 404] = "NOT_FOUND";
     HttpStatus[HttpStatus["INTERNAL_SERVER_ERROR"] = 500] = "INTERNAL_SERVER_ERROR";
 })(HttpStatus || (exports.HttpStatus = HttpStatus = {}));
+var TicketStatus;
+(function (TicketStatus) {
+    TicketStatus["OPEN"] = "open";
+    TicketStatus["IN_PROGRESS"] = "in_progress";
+    TicketStatus["RESOLVED"] = "resolved";
+    TicketStatus["CLOSED"] = "closed";
+})(TicketStatus || (exports.TicketStatus = TicketStatus = {}));
+var deleteType;
+(function (deleteType) {
+    deleteType["hard"] = "hard_delete";
+    deleteType["soft"] = "soft_delete";
+})(deleteType || (exports.deleteType = deleteType = {}));
+var UserRoles;
+(function (UserRoles) {
+    UserRoles["USER"] = "user";
+    UserRoles["ADMIN"] = "admin";
+})(UserRoles || (exports.UserRoles = UserRoles = {}));
 //# sourceMappingURL=static.js.map

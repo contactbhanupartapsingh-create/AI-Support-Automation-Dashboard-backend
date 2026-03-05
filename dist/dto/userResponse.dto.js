@@ -12,11 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserResponseDto = void 0;
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
+const static_1 = require("../static");
 class UserResponseDto {
     id;
     firstName;
     lastName;
     email;
+    role;
     password;
 }
 exports.UserResponseDto = UserResponseDto;
@@ -36,6 +38,10 @@ __decorate([
     (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], UserResponseDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(static_1.UserRoles),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "role", void 0);
 __decorate([
     (0, class_transformer_1.Exclude)(),
     __metadata("design:type", String)

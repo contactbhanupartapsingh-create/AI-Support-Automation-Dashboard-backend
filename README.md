@@ -1,98 +1,95 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🤖 AI Support Automation Dashboard – Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend service for an AI-powered support automation dashboard built using **NestJS**, **TypeORM**, and **PostgreSQL**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This system manages user authentication, role-based access control (RBAC), and support ticket lifecycle operations with proper data governance and administrative controls.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🚀 Core Features
 
-## Project setup
+- 🔐 JWT-based Authentication – Secure Register/Login flow.
+- 👥 Role-Based Access Control – Granular Admin/User permissions.
+- 🎫 Ticket Lifecycle Management – Full CRUD with status transitions.
+- ♻️ Data Governance – Soft delete for safety, hard delete for Admin cleanup.
+- 🛡 Custom Param Decorators – Specialized decorators for @GetUser(), @GetPagination(), and @Roles().
+- 📦 Smart Pagination & Filtering – Unified DTO-based query handling with limit, offset, and status filters.
+- 📜 Logger Middleware – Global interceptor for auditing HTTP requests and monitoring API latency.
+- ⚠️ Standardized Responses – Unified HTTP Exception handling and structured JSON responses.
+- 🗂 Modular and Scalable Architecture
+
+---
+
+## 🏗 System Design Overview
+
+### User Capabilities
+- Create tickets
+- View own active tickets
+- Update own tickets
+- Soft delete own tickets
+- View own deleted tickets (trash state)
+
+### Admin Capabilities
+- View all tickets across users
+- Restore soft-deleted tickets
+- Hard delete tickets permanently
+- Modify ticket status
+- Full system-level control
+
+This architecture simulates real-world enterprise-level access control and data lifecycle management.
+
+---
+
+## 🛠 Tech Stack
+
+- **NestJS**
+- **TypeORM**
+- **PostgreSQL**
+- **JWT**
+- **bcrypt**
+- **Class Validator**
+- **Custom Role Guards**
+
+---
+
+## 📌 API Endpoints
+
+### Authentication
+- `POST /auth/register`
+- `POST /auth/login`
+
+### Ticket Routes
+- `GET /tickets` (current user tickets)
+- `POST /tickets`
+- `PATCH /tickets/updateStatus`
+- `DELETE /tickets` (Soft Delete)
+
+### Ticket Admin Routes
+- `GET /tickets/all` (all user tickets)
+- `PATCH /tickets/restore` 
+- `DELETE /tickets` (soft and hard delete)
+
+---
+
+## 🚀 Live API Testing (Postman)
+
+We provide a public Postman collection to help you explore and test the API endpoints without manual configuration.
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://contactbhanupartapsingh-5069762.postman.co/workspace/Bhanu-Partap-Singh's-Workspace~b3de8cf4-e054-41d0-8bd7-8d81aee84061/collection/52729728-6b4a9e68-3ea1-4fdf-a1b8-fcfd3ce37d81?action=share&creator=52729728)
+
+### 🛠 How to use:
+1. **Fork the Collection:** Click the button above and select "Fork" to move it to your own Postman workspace.
+2. **Set Environment Variables:** - Set `baseUrl` to `http://localhost:3000` (or your hosted URL).
+3. **Authentication Flow:**
+   - Use the `Register` endpoint to create a user.
+   - Use `Login` to receive a **JWT Access Token**.
+   - Copy the token and paste it into the **Collection Authorization** tab (Type: Bearer Token). This will automatically authorize all other requests.
+
+---
+
+## ⚙️ Installation
 
 ```bash
-$ npm install
-```
-
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+git clone https://github.com/<your-username>/AI-Support-Automation-Dashboard-backend.git
+cd AI-Support-Automation-Dashboard-backend
+npm install

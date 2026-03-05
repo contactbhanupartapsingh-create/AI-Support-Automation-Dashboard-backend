@@ -1,5 +1,5 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
-import { deleteType, HttpStatus} from 'src/static';
+import { deleteType, HttpStatus } from 'src/static';
 import { Ticket } from 'src/entity/ticket.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
@@ -8,24 +8,36 @@ import { TicketCreateDto } from 'src/dto/ticketCreate.dto';
 import { TicketChangeStatusDto } from 'src/dto/ticketChangeStatus.dto';
 import { TicketDeleteDto } from 'src/dto/ticketDelete.dto';
 import { TicketDeleteAdminDto } from 'src/dto/ticketDeleteAdmin.dto';
+import { PaginationQueryDto } from 'src/dto/paginationQuery.dto';
+import { TicketResponseDto } from 'src/dto/getTicketResponse.dto';
 
 @Injectable()
 export class TicketService {
   @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>
 
 
-  async getUserTickets(user: User, getDeleted: boolean = false): Promise<Ticket[]> {
-    return await this.ticketRepository.find({
+  async getUserTickets(user: User, paginationQuery, getDeleted: boolean = false): Promise<TicketResponseDto> {
+    const {skip, limit, page } = paginationQuery
+    return await this.ticketRepository.findAndCount({
       where: {
         user: { id: user.id },
         deletedAt: getDeleted ? Not(IsNull()) : IsNull()
       },
-      withDeleted:getDeleted,
+      withDeleted: getDeleted,
       relations: {
         user: true
-      }
+      },
+      take: limit,
+      skip
     }).then(async (data) => {
-      return data
+      return {
+        'tickets': data[0],
+        'meta':{
+          'totalItems': data[1],
+          'totalPages':Math.ceil(data[1]/limit),
+          'currentPage': page
+        }
+      }
     }).catch((err) => {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     })
@@ -89,16 +101,31 @@ export class TicketService {
 
   //**********************************************admin logic******************************************** */
 
-  async getAllTickets(getDeleted : boolean): Promise<Ticket[]> {
-    return await this.ticketRepository.find({
-      withDeleted:getDeleted
-    }).then(async (data) => {
-      return data
-    }).catch((err) => {
-      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
-    })
+  async getAllTickets(getDeleted: boolean, paginationQuery: PaginationQueryDto): Promise<TicketResponseDto> {
+    const { page, limit, skip } = paginationQuery
+    try {
+      const tickets = await this.ticketRepository.findAndCount({
+        take: limit,
+        skip,
+        withDeleted: getDeleted,
+        order: {
+          createdAt: 'DESC'
+        }
+      })
+      
+      return {
+        'tickets': tickets[0],
+        'meta':{
+          'totalItems': tickets[1],
+          'totalPages':Math.ceil(tickets[1]/limit),
+          'currentPage': page
+        }
+      }
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
   }
-  
+
   async restoreTicket(ticketId: number): Promise<Ticket | null> {
     try {
       const ticket = await this.ticketRepository.find({

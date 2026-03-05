@@ -26,3 +26,9 @@ export enum UserRoles {
     USER='user',
     ADMIN='admin'
 }
+
+export type PaginationMeta = {
+    totalItems: number,
+    totalPages: number,
+    currentPage: number
+}

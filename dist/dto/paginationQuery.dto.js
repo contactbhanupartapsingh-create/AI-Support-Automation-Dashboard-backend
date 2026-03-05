@@ -9,14 +9,26 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetTicketsDto = void 0;
-const class_transformer_1 = require("class-transformer");
-class GetTicketsDto {
-    getDeleted;
+exports.PaginationQueryDto = void 0;
+const class_validator_1 = require("class-validator");
+class PaginationQueryDto {
+    page;
+    limit;
+    skip;
 }
-exports.GetTicketsDto = GetTicketsDto;
+exports.PaginationQueryDto = PaginationQueryDto;
 __decorate([
-    (0, class_transformer_1.Type)(() => Boolean),
-    __metadata("design:type", Boolean)
-], GetTicketsDto.prototype, "getDeleted", void 0);
-//# sourceMappingURL=GetTickets.dto.js.map
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], PaginationQueryDto.prototype, "page", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(20),
+    __metadata("design:type", Number)
+], PaginationQueryDto.prototype, "limit", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], PaginationQueryDto.prototype, "skip", void 0);
+//# sourceMappingURL=paginationQuery.dto.js.map

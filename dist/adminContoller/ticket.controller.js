@@ -14,8 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminTicketController = void 0;
 const common_1 = require("@nestjs/common");
+const pagination_decorator_1 = require("../decorators/pagination.decorator");
 const roles_decorator_1 = require("../decorators/roles.decorator");
 const ticket_decorator_1 = require("../decorators/ticket.decorator");
+const paginationQuery_dto_1 = require("../dto/paginationQuery.dto");
 const ticketDeleteAdmin_dto_1 = require("../dto/ticketDeleteAdmin.dto");
 const ticketRestore_dto_1 = require("../dto/ticketRestore.dto");
 const auth_guard_1 = require("../guards/auth.guard");
@@ -27,9 +29,9 @@ let AdminTicketController = class AdminTicketController {
     constructor(ticketService) {
         this.ticketService = ticketService;
     }
-    async getAllTickets(getDeleted) {
+    async getAllTickets(getDeleted, paginationQuery) {
         try {
-            return await this.ticketService.getAllTickets(getDeleted);
+            return await this.ticketService.getAllTickets(getDeleted, paginationQuery);
         }
         catch (err) {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
@@ -56,8 +58,9 @@ exports.AdminTicketController = AdminTicketController;
 __decorate([
     (0, common_1.Get)('all'),
     __param(0, (0, common_1.Query)('getDeleted')),
+    __param(1, (0, pagination_decorator_1.Pagination)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Boolean]),
+    __metadata("design:paramtypes", [Boolean, paginationQuery_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", Promise)
 ], AdminTicketController.prototype, "getAllTickets", null);
 __decorate([

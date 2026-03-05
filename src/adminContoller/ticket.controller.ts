@@ -1,6 +1,9 @@
 import { Controller, Delete, Get, HttpException, Patch, Query, UseGuards } from "@nestjs/common";
+import { Pagination } from "src/decorators/pagination.decorator";
 import { Roles } from "src/decorators/roles.decorator";
 import { TicketDecorator } from "src/decorators/ticket.decorator";
+import { TicketResponseDto } from "src/dto/getTicketResponse.dto";
+import { PaginationQueryDto } from "src/dto/paginationQuery.dto";
 import { TicketDeleteAdminDto } from "src/dto/ticketDeleteAdmin.dto";
 import { TicketRestoreDto } from "src/dto/ticketRestore.dto";
 import { Ticket } from "src/entity/ticket.entity";
@@ -18,9 +21,9 @@ export class AdminTicketController {
   ) { }
 
   @Get('all')
-  async getAllTickets(@Query('getDeleted') getDeleted : boolean): Promise<Ticket[]> {
+  async getAllTickets(@Query('getDeleted') getDeleted : boolean, @Pagination() paginationQuery : PaginationQueryDto): Promise<TicketResponseDto> {
     try {
-      return await this.ticketService.getAllTickets(getDeleted)
+      return await this.ticketService.getAllTickets(getDeleted, paginationQuery)
     } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }

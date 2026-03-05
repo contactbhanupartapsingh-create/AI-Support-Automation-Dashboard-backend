@@ -23,22 +23,24 @@ const ticketChangeStatus_dto_1 = require("../dto/ticketChangeStatus.dto");
 const ticketDelete_dto_1 = require("../dto/ticketDelete.dto");
 const auth_guard_1 = require("../guards/auth.guard");
 const ticket_decorator_1 = require("../decorators/ticket.decorator");
+const pagination_decorator_1 = require("../decorators/pagination.decorator");
+const paginationQuery_dto_1 = require("../dto/paginationQuery.dto");
 let TicketController = class TicketController {
     ticketService;
     constructor(ticketService) {
         this.ticketService = ticketService;
     }
-    async getUserTickets(user) {
+    async getUserTickets(user, paginationQuery) {
         try {
-            return await this.ticketService.getUserTickets(user);
+            return await this.ticketService.getUserTickets(user, paginationQuery);
         }
         catch (err) {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    async getTrashTicketsByUser(user) {
+    async getTrashTicketsByUser(user, paginationQuery) {
         try {
-            return await this.ticketService.getUserTickets(user, true);
+            return await this.ticketService.getUserTickets(user, paginationQuery, true);
         }
         catch (err) {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
@@ -74,15 +76,17 @@ exports.TicketController = TicketController;
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, user_decorator_1.UserDecorator)(['user'])),
+    __param(1, (0, pagination_decorator_1.Pagination)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.User]),
+    __metadata("design:paramtypes", [user_entity_1.User, paginationQuery_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", Promise)
 ], TicketController.prototype, "getUserTickets", null);
 __decorate([
     (0, common_1.Get)('trash'),
     __param(0, (0, user_decorator_1.UserDecorator)(['user'])),
+    __param(1, (0, pagination_decorator_1.Pagination)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.User]),
+    __metadata("design:paramtypes", [user_entity_1.User, paginationQuery_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", Promise)
 ], TicketController.prototype, "getTrashTicketsByUser", null);
 __decorate([

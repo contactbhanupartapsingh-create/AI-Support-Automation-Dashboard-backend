@@ -17,8 +17,9 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 let TicketService = class TicketService {
     ticketRepository;
-    async getUserTickets(user, getDeleted = false) {
-        return await this.ticketRepository.find({
+    async getUserTickets(user, paginationQuery, getDeleted = false) {
+        const { skip, limit, page } = paginationQuery;
+        return await this.ticketRepository.findAndCount({
             where: {
                 user: { id: user.id },
                 deletedAt: getDeleted ? (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) : (0, typeorm_2.IsNull)()
@@ -26,9 +27,18 @@ let TicketService = class TicketService {
             withDeleted: getDeleted,
             relations: {
                 user: true
-            }
+            },
+            take: limit,
+            skip
         }).then(async (data) => {
-            return data;
+            return {
+                'tickets': data[0],
+                'meta': {
+                    'totalItems': data[1],
+                    'totalPages': Math.ceil(data[1] / limit),
+                    'currentPage': page
+                }
+            };
         }).catch((err) => {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
         });
@@ -83,14 +93,29 @@ let TicketService = class TicketService {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    async getAllTickets(getDeleted) {
-        return await this.ticketRepository.find({
-            withDeleted: getDeleted
-        }).then(async (data) => {
-            return data;
-        }).catch((err) => {
+    async getAllTickets(getDeleted, paginationQuery) {
+        const { page, limit, skip } = paginationQuery;
+        try {
+            const tickets = await this.ticketRepository.findAndCount({
+                take: limit,
+                skip,
+                withDeleted: getDeleted,
+                order: {
+                    createdAt: 'DESC'
+                }
+            });
+            return {
+                'tickets': tickets[0],
+                'meta': {
+                    'totalItems': tickets[1],
+                    'totalPages': Math.ceil(tickets[1] / limit),
+                    'currentPage': page
+                }
+            };
+        }
+        catch (err) {
             throw new common_1.HttpException(err, static_1.HttpStatus.INTERNAL_SERVER_ERROR);
-        });
+        }
     }
     async restoreTicket(ticketId) {
         try {

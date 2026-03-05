@@ -1,1 +1,1 @@
-{"version":3,"file":"getTickets.dto.js","sourceRoot":"","sources":["../../src/dto/getTickets.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,yDAAyC;AAEzC,MAAa,aAAa;IAEtB,UAAU,CAAS;CACtB;AAHD,sCAGC;AADG;IADC,IAAA,wBAAI,EAAC,GAAG,EAAE,CAAC,OAAO,CAAC;;iDACD"}
+{"version":3,"file":"GetTickets.dto.js","sourceRoot":"","sources":["../../src/dto/GetTickets.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,yDAAyC;AAEzC,MAAa,aAAa;IAEtB,UAAU,CAAS;CACtB;AAHD,sCAGC;AADG;IADC,IAAA,wBAAI,EAAC,GAAG,EAAE,CAAC,OAAO,CAAC;;iDACD"}

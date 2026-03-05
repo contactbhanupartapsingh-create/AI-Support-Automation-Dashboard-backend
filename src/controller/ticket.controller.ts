@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpException, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, HttpException, Patch, Post, UseGuards } from '@nestjs/common';
 import { TicketCreateDto } from 'src/dto/ticketCreate.dto';
 import { Ticket } from 'src/entity/ticket.entity';
 import { User } from 'src/entity/user.entity';
@@ -12,6 +12,8 @@ import { TicketDecorator } from 'src/decorators/ticket.decorator';
 import { Pagination } from 'src/decorators/pagination.decorator';
 import { PaginationQueryDto } from 'src/dto/paginationQuery.dto';
 import { TicketResponseDto } from 'src/dto/getTicketResponse.dto';
+import { Filters } from 'src/decorators/filters.decorator';
+import { FilterQueryDto } from 'src/dto/filterQuery.dto';
 
 @UseGuards(AuthGuard)
 @Controller('/ticket')
@@ -19,25 +21,36 @@ export class TicketController {
     constructor(private readonly ticketService: TicketService) {}
 
   @Get()
-  async getUserTickets(@UserDecorator(['user']) user: User, @Pagination() paginationQuery: PaginationQueryDto): Promise<TicketResponseDto> {
+  async getUserTickets(
+    @UserDecorator(['user']) user: User, 
+    @Pagination() paginationQuery: PaginationQueryDto,
+    @Filters() filters: FilterQueryDto
+  ): Promise<TicketResponseDto> {
     try {
-        return await this.ticketService.getUserTickets(user, paginationQuery)
+        return await this.ticketService.getUserTickets(user, paginationQuery, filters)
     }catch(err){
         throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Get('trash')
-  async getTrashTicketsByUser(@UserDecorator(['user']) user: User, @Pagination() paginationQuery: PaginationQueryDto): Promise<TicketResponseDto> {
+  async getTrashTicketsByUser(
+    @UserDecorator(['user']) user: User, 
+    @Pagination() paginationQuery: PaginationQueryDto,
+    @Filters() filters: FilterQueryDto
+  ): Promise<TicketResponseDto> {
     try {
-        return await this.ticketService.getUserTickets(user, paginationQuery, true)
+        return await this.ticketService.getUserTickets(user, paginationQuery, filters)
     }catch(err){
         throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Post('create')
-  async createTicket(@UserDecorator(['user']) user: User,  @TicketDecorator('body') ticketData: TicketCreateDto) : Promise<Ticket> {
+  async createTicket(
+    @UserDecorator(['user']) user: User,  
+    @TicketDecorator('body') ticketData: TicketCreateDto
+  ) : Promise<Ticket> {
     try {
         return await this.ticketService.createTicketForUser(user, ticketData)
     }catch(err){
@@ -46,7 +59,10 @@ export class TicketController {
   }
 
   @Patch('updateStatus')
-  async changeStatus(@UserDecorator(['id']) userId: number,@TicketDecorator('body') ticketData: TicketChangeStatusDto ) : Promise<Ticket> {
+  async changeStatus(
+    @UserDecorator(['id']) userId: number,
+    @TicketDecorator('body') ticketData: TicketChangeStatusDto 
+  ) : Promise<Ticket> {
     try{
       return await this.ticketService.changeTicketStatus(userId, ticketData)
     }catch(err){
@@ -55,7 +71,10 @@ export class TicketController {
   }
 
   @Delete('delete')
-  async deleteTicket(@UserDecorator(['id']) userData : {id:number},@TicketDecorator('body') deleteData: TicketDeleteDto) : Promise<Ticket> {
+  async deleteTicket(
+    @UserDecorator(['id']) userData : {id:number},
+    @TicketDecorator('body') deleteData: TicketDeleteDto
+  ) : Promise<Ticket> {
     try{
       const {id:userId} = userData
       return await this.ticketService.deleteTicket( userId, deleteData)

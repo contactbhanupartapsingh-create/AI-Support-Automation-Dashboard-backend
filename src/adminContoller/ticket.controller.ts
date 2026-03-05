@@ -1,7 +1,9 @@
 import { Controller, Delete, Get, HttpException, Patch, Query, UseGuards } from "@nestjs/common";
+import { Filters } from "src/decorators/filters.decorator";
 import { Pagination } from "src/decorators/pagination.decorator";
 import { Roles } from "src/decorators/roles.decorator";
 import { TicketDecorator } from "src/decorators/ticket.decorator";
+import { FilterQueryDto } from "src/dto/filterQuery.dto";
 import { TicketResponseDto } from "src/dto/getTicketResponse.dto";
 import { PaginationQueryDto } from "src/dto/paginationQuery.dto";
 import { TicketDeleteAdminDto } from "src/dto/ticketDeleteAdmin.dto";
@@ -21,16 +23,21 @@ export class AdminTicketController {
   ) { }
 
   @Get('all')
-  async getAllTickets(@Query('getDeleted') getDeleted : boolean, @Pagination() paginationQuery : PaginationQueryDto): Promise<TicketResponseDto> {
+  async getAllTickets(
+    @Filters() filters: FilterQueryDto, 
+    @Pagination() paginationQuery : PaginationQueryDto
+  ): Promise<TicketResponseDto> {
     try {
-      return await this.ticketService.getAllTickets(getDeleted, paginationQuery)
+      return await this.ticketService.getAllTickets(filters, paginationQuery)
     } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Delete('delete')
-  async deleteTicket(@TicketDecorator('body') deleteData: TicketDeleteAdminDto): Promise<Ticket> {
+  async deleteTicket(
+    @TicketDecorator('body') deleteData: TicketDeleteAdminDto
+  ): Promise<Ticket> {
     try {
       return await this.ticketService.deleteTicketByAdmin(deleteData)
     } catch (err) {
@@ -39,7 +46,9 @@ export class AdminTicketController {
   }
 
   @Patch('restore')
-  async restoreTicket(@TicketDecorator('body') restoreData: TicketRestoreDto): Promise<Ticket | null> {
+  async restoreTicket(
+    @TicketDecorator('body') restoreData: TicketRestoreDto
+  ): Promise<Ticket | null> {
     try {
       return await this.ticketService.restoreTicket(restoreData.id)
     } catch (err) {

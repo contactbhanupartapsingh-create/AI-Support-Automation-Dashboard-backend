@@ -3,7 +3,7 @@ import { TicketCreateDto } from 'src/dto/ticketCreate.dto';
 import { Ticket } from 'src/entity/ticket.entity';
 import { User } from 'src/entity/user.entity';
 import { TicketService } from 'src/services/ticket.service';
-import { HttpStatus, TicketStatus } from 'src/static';
+import { HttpStatus, TicketStatus } from 'src/common/enums';
 import { UserDecorator } from 'src/decorators/user.decorator';
 import { TicketChangeStatusDto } from 'src/dto/ticketChangeStatus.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
@@ -14,20 +14,30 @@ import { TicketResponseDto } from 'src/dto/getTicketResponse.dto';
 import { Filters } from 'src/decorators/filters.decorator';
 import { FilterQueryDto } from 'src/dto/filterQuery.dto';
 import { TicketUpdateDto } from 'src/dto/ticketUpdate.dto';
+import { Sort } from 'src/decorators/sort.decorator';
+import { SortQueryDto } from 'src/dto/sortQuery.dto';
 
 @UseGuards(AuthGuard)
 @Controller('/ticket')
 export class TicketController {
-    constructor(private readonly ticketService: TicketService) {}
+    constructor(
+      private readonly ticketService: TicketService
+    ) {}
 
   @Get()
   async getUserTickets(
     @UserDecorator(['user']) user: User, 
     @Pagination() paginationQuery: PaginationQueryDto,
-    @Filters() filters: FilterQueryDto
+    @Filters() filters: FilterQueryDto,
+    @Sort() sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
     try {
-        return await this.ticketService.getUserTickets(user, paginationQuery, filters)
+        return await this.ticketService.getUserTickets(
+          user, 
+          paginationQuery, 
+          filters, 
+          sortFilters
+        )
     }catch(err){
         throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -37,10 +47,11 @@ export class TicketController {
   async getTrashTicketsByUser(
     @UserDecorator(['user']) user: User, 
     @Pagination() paginationQuery: PaginationQueryDto,
-    @Filters() filters: FilterQueryDto
+    @Filters() filters: FilterQueryDto,
+    @Sort() sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
     try {
-        return await this.ticketService.getUserTickets(user, paginationQuery, filters)
+        return await this.ticketService.getUserTickets(user, paginationQuery, filters, sortFilters)
     }catch(err){
         throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }

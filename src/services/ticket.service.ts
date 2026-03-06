@@ -1,5 +1,5 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
-import { deleteType, HttpStatus } from 'src/static';
+import { deleteType, HttpStatus, SortOrder, TicketSortFields } from 'src/common/enums';
 import { Ticket } from 'src/entity/ticket.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, Not, Repository } from 'typeorm';
@@ -10,6 +10,7 @@ import { PaginationQueryDto } from 'src/dto/paginationQuery.dto';
 import { TicketResponseDto } from 'src/dto/getTicketResponse.dto';
 import { FilterQueryDto } from 'src/dto/filterQuery.dto';
 import { TicketUpdateDto } from 'src/dto/ticketUpdate.dto';
+import { SortQueryDto } from 'src/dto/sortQuery.dto';
 
 @Injectable()
 export class TicketService {
@@ -17,31 +18,39 @@ export class TicketService {
 
 
   async getUserTickets(
-    user: User, 
-    paginationQuery: PaginationQueryDto, 
-    filters: FilterQueryDto
+    user: User,
+    paginationQuery: PaginationQueryDto,
+    filters: FilterQueryDto,
+    sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
-    const {skip, limit, page } = paginationQuery
-    const {status} = filters
+    const { skip, limit, page } = paginationQuery
+    const { status } = filters
+    const { sortBy = TicketSortFields.CREATED_AT, order = SortOrder.DESC } = sortFilters
     const getDeleted = true
     return await this.ticketRepository.findAndCount({
       where: {
         user: { id: user.id },
         deletedAt: getDeleted ? Not(IsNull()) : IsNull()
       },
-      ...(status && {status: In(status)}),
+      ...(status && { status: In(status) }),
       relations: {
         user: true
+      },
+      order: {
+        [sortBy]: order
       },
       take: limit,
       skip
     }).then(async (data) => {
       return {
         'tickets': data[0],
-        'meta':{
+        'meta': {
           'totalItems': data[1],
-          'totalPages':Math.ceil(data[1]/limit),
-          'currentPage': page
+          'totalPages': Math.ceil(data[1] / limit),
+          'currentPage': page,
+          'sortBy': sortBy,
+          'order': order,
+          'filters': filters
         }
       }
     }).catch((err) => {
@@ -62,7 +71,7 @@ export class TicketService {
   }
 
   async updateTicket(
-    userId: number, 
+    userId: number,
     ticketId: number,
     updateData: TicketUpdateDto
   ): Promise<Ticket> {
@@ -92,7 +101,7 @@ export class TicketService {
   }
 
   async deleteTicket(
-    userId: number, 
+    userId: number,
     ticketId: number
   ): Promise<Ticket> {
     try {
@@ -117,26 +126,34 @@ export class TicketService {
 
   //**********************************************admin logic******************************************** */
 
-  async getAllTickets(filters: FilterQueryDto, paginationQuery: PaginationQueryDto): Promise<TicketResponseDto> {
+  async getAllTickets(
+    filters: FilterQueryDto,
+    paginationQuery: PaginationQueryDto,
+    sortFilters: SortQueryDto
+  ): Promise<TicketResponseDto> {
     const { page, limit, skip } = paginationQuery
-    const {getDeleted, status} = filters
+    const { getDeleted, status } = filters
+    const { sortBy = TicketSortFields.CREATED_AT, order = SortOrder.DESC } = sortFilters
     try {
       const tickets = await this.ticketRepository.findAndCount({
         withDeleted: getDeleted,
-        ...(status && {status: In(status)}),
+        ...(status && { status: In(status) }),
         order: {
-          createdAt: 'DESC'
+          [sortBy]: order
         },
         take: limit,
         skip,
       })
-      
+
       return {
         'tickets': tickets[0],
-        'meta':{
+        'meta': {
           'totalItems': tickets[1],
-          'totalPages':Math.ceil(tickets[1]/limit),
-          'currentPage': page
+          'totalPages': Math.ceil(tickets[1] / limit),
+          'currentPage': page,
+          'sortBy': sortBy,
+          'order': order,
+          'filters': filters
         }
       }
     } catch (err) {

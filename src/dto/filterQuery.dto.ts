@@ -1,6 +1,6 @@
 import { Transform } from "class-transformer";
-import { IsArray, isArray, IsEnum } from "class-validator";
-import { TicketStatus } from "src/static";
+import { IsArray, IsEnum } from "class-validator";
+import { TicketStatus } from "src/common/enums";
 
 export class FilterQueryDto {
     @IsEnum(TicketStatus)

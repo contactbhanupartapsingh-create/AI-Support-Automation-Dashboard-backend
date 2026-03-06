@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, DeleteDateColumn } from 'typeorm';
 import { User } from './user.entity';
-import { TicketStatus } from 'src/static';
+import { TicketStatus } from 'src/common/enums';
 
 @Entity()
 export class Ticket {

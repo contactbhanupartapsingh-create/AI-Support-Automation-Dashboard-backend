@@ -1,10 +1,11 @@
 import { Transform } from "class-transformer";
-import { IsEnum } from "class-validator";
+import { IsArray, isArray, IsEnum } from "class-validator";
 import { TicketStatus } from "src/static";
 
 export class FilterQueryDto {
     @IsEnum(TicketStatus)
-    status: TicketStatus
+    @IsArray()
+    status: TicketStatus[]
 
     @Transform(({value}) => value ?? false)
     getDeleted: boolean

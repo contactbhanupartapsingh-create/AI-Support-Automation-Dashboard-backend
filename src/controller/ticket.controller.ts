@@ -1,12 +1,11 @@
-import { Controller, Delete, Get, HttpException, Patch, Post, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, HttpException, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { TicketCreateDto } from 'src/dto/ticketCreate.dto';
 import { Ticket } from 'src/entity/ticket.entity';
 import { User } from 'src/entity/user.entity';
 import { TicketService } from 'src/services/ticket.service';
-import { HttpStatus } from 'src/static';
+import { HttpStatus, TicketStatus } from 'src/static';
 import { UserDecorator } from 'src/decorators/user.decorator';
 import { TicketChangeStatusDto } from 'src/dto/ticketChangeStatus.dto';
-import { TicketDeleteDto } from 'src/dto/ticketDelete.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { TicketDecorator } from 'src/decorators/ticket.decorator';
 import { Pagination } from 'src/decorators/pagination.decorator';
@@ -14,6 +13,7 @@ import { PaginationQueryDto } from 'src/dto/paginationQuery.dto';
 import { TicketResponseDto } from 'src/dto/getTicketResponse.dto';
 import { Filters } from 'src/decorators/filters.decorator';
 import { FilterQueryDto } from 'src/dto/filterQuery.dto';
+import { TicketUpdateDto } from 'src/dto/ticketUpdate.dto';
 
 @UseGuards(AuthGuard)
 @Controller('/ticket')
@@ -46,7 +46,7 @@ export class TicketController {
     }
   }
 
-  @Post('create')
+  @Post()
   async createTicket(
     @UserDecorator(['user']) user: User,  
     @TicketDecorator('body') ticketData: TicketCreateDto
@@ -58,26 +58,42 @@ export class TicketController {
     }
   }
 
-  @Patch('updateStatus')
-  async changeStatus(
+  @Patch(':id')
+  async updateTicket(
+    @Param('id') ticketId: number,
     @UserDecorator(['id']) userId: number,
-    @TicketDecorator('body') ticketData: TicketChangeStatusDto 
+    @TicketDecorator('body') updateData: TicketUpdateDto 
   ) : Promise<Ticket> {
     try{
-      return await this.ticketService.changeTicketStatus(userId, ticketData)
+      return await this.ticketService.updateTicket(userId, ticketId, updateData)
     }catch(err){
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  @Delete('delete')
+  @Patch(':id/status')
+  async changeStatus(
+    @Param('id') ticketId: number,
+    @UserDecorator(['id']) userId: number,
+    @TicketDecorator('body') ticketStatus: TicketChangeStatusDto 
+  ) : Promise<Ticket> {
+    try{
+      const status: TicketStatus = ticketStatus.status
+      const updateData: TicketUpdateDto = {status}
+      return await this.ticketService.updateTicket(userId, ticketId,  updateData)
+    }catch(err){
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Delete(':id')
   async deleteTicket(
-    @UserDecorator(['id']) userData : {id:number},
-    @TicketDecorator('body') deleteData: TicketDeleteDto
+    @Param('id') ticketId : number,
+    @UserDecorator(['id']) userData : {id:number}
   ) : Promise<Ticket> {
     try{
       const {id:userId} = userData
-      return await this.ticketService.deleteTicket( userId, deleteData)
+      return await this.ticketService.deleteTicket( userId, ticketId)
     }catch(err){
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }

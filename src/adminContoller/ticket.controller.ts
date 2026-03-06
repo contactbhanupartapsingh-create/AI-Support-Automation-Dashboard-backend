@@ -11,7 +11,9 @@ import { Ticket } from "src/entity/ticket.entity";
 import { AuthGuard } from "src/guards/auth.guard";
 import { RoleGuard } from "src/guards/role.guard";
 import { TicketService } from "src/services/ticket.service";
-import { HttpStatus, UserRoles } from "src/static";
+import { HttpStatus, UserRoles } from "src/common/enums";
+import { Sort } from "src/decorators/sort.decorator";
+import { SortQueryDto } from "src/dto/sortQuery.dto";
 
 @Controller('/admin/ticket')
 @UseGuards(AuthGuard, RoleGuard)
@@ -24,10 +26,15 @@ export class AdminTicketController {
   @Get()
   async getAllTickets(
     @Filters() filters: FilterQueryDto, 
-    @Pagination() paginationQuery : PaginationQueryDto
+    @Pagination() paginationQuery : PaginationQueryDto,
+    @Sort() sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
     try {
-      return await this.ticketService.getAllTickets(filters, paginationQuery)
+      return await this.ticketService.getAllTickets(
+        filters, 
+        paginationQuery, 
+        sortFilters
+      )
     } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }

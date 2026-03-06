@@ -27,8 +27,12 @@ export enum UserRoles {
     ADMIN='admin'
 }
 
-export type PaginationMeta = {
-    totalItems: number,
-    totalPages: number,
-    currentPage: number
+export enum TicketSortFields {
+    CREATED_AT = 'createdAt',
+    UPDATED_AT = 'updatedAt'
+}
+
+export enum SortOrder {
+    ASC='ASC',
+    DESC='DESC'
 }

@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { IsEmail, IsEnum, IsNumber, IsString } from 'class-validator';
-import { UserRoles } from 'src/static';
+import { UserRoles } from 'src/common/enums';
 
 export class UserResponseDto {
   @IsNumber()

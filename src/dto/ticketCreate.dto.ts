@@ -1,6 +1,5 @@
-import { Transform } from "class-transformer";
 import { IsString, IsEnum, IsNotEmpty, IsOptional} from "class-validator";
-import { TicketStatus, UserRoles } from "src/static";
+import { TicketStatus } from "src/common/enums";
 
 export class TicketCreateDto {
     @IsString()

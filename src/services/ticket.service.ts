@@ -2,15 +2,14 @@ import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { deleteType, HttpStatus } from 'src/static';
 import { Ticket } from 'src/entity/ticket.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Not, Repository } from 'typeorm';
+import { In, IsNull, Not, Repository } from 'typeorm';
 import { User } from 'src/entity/user.entity';
 import { TicketCreateDto } from 'src/dto/ticketCreate.dto';
-import { TicketChangeStatusDto } from 'src/dto/ticketChangeStatus.dto';
-import { TicketDeleteDto } from 'src/dto/ticketDelete.dto';
 import { TicketDeleteAdminDto } from 'src/dto/ticketDeleteAdmin.dto';
 import { PaginationQueryDto } from 'src/dto/paginationQuery.dto';
 import { TicketResponseDto } from 'src/dto/getTicketResponse.dto';
 import { FilterQueryDto } from 'src/dto/filterQuery.dto';
+import { TicketUpdateDto } from 'src/dto/ticketUpdate.dto';
 
 @Injectable()
 export class TicketService {
@@ -30,11 +29,10 @@ export class TicketService {
         user: { id: user.id },
         deletedAt: getDeleted ? Not(IsNull()) : IsNull()
       },
-      withDeleted: getDeleted,
+      ...(status && {status: In(status)}),
       relations: {
         user: true
       },
-      ...(status && {status}),
       take: limit,
       skip
     }).then(async (data) => {
@@ -63,21 +61,29 @@ export class TicketService {
     }
   }
 
-  async changeTicketStatus(userId: number, ticketData: TicketChangeStatusDto): Promise<Ticket> {
+  async updateTicket(
+    userId: number, 
+    ticketId: number,
+    updateData: TicketUpdateDto
+  ): Promise<Ticket> {
     try {
-      const { id, status } = ticketData
+      const { status, title, description } = updateData
 
       const ticket = await this.ticketRepository.findOne({
-        where: { id },
+        where: { id: ticketId },
         relations: ['user']
       })
 
-      if (!ticket) throw new HttpException(`ticket id: ${id}not found`, HttpStatus.INTERNAL_SERVER_ERROR)
+      if (!ticket) throw new HttpException(`ticket id: ${ticketId}not found`, HttpStatus.INTERNAL_SERVER_ERROR)
 
       if (ticket.user.id != userId) throw new HttpException(` user not authorized to access this ticket`, HttpStatus.UNAUTHORIZED)
 
-      ticket.status = status
+      ticket.title = title ?? ticket.title
+      ticket.description = description ?? ticket.description
+      ticket.status = status ?? ticket.status
+
       this.ticketRepository.save(ticket)
+
       return ticket
 
     } catch (err) {
@@ -85,9 +91,11 @@ export class TicketService {
     }
   }
 
-  async deleteTicket(userId: number, ticketDeleteData: TicketDeleteDto): Promise<Ticket> {
+  async deleteTicket(
+    userId: number, 
+    ticketId: number
+  ): Promise<Ticket> {
     try {
-      const { id: ticketId } = ticketDeleteData
       const ticket = await this.ticketRepository.findOne({
         where: { id: ticketId },
         relations: ['user']
@@ -114,13 +122,13 @@ export class TicketService {
     const {getDeleted, status} = filters
     try {
       const tickets = await this.ticketRepository.findAndCount({
-        take: limit,
-        skip,
         withDeleted: getDeleted,
-        ...(status && {status}),
+        ...(status && {status: In(status)}),
         order: {
           createdAt: 'DESC'
-        }
+        },
+        take: limit,
+        skip,
       })
       
       return {
@@ -160,15 +168,15 @@ export class TicketService {
     }
   }
 
-  async deleteTicketByAdmin(ticketDeleteData: TicketDeleteAdminDto): Promise<Ticket> {
+  async deleteTicketByAdmin(ticketDeleteData: TicketDeleteAdminDto, ticketId: number): Promise<Ticket> {
     try {
-      const { id, type } = ticketDeleteData
+      const { type } = ticketDeleteData
       const ticket = await this.ticketRepository.findOne({
-        where: { id },
+        where: { id: ticketId },
         relations: ['user']
       })
 
-      if (!ticket) throw new HttpException(`ticket id: ${id} not found`, HttpStatus.INTERNAL_SERVER_ERROR)
+      if (!ticket) throw new HttpException(`ticket id: ${ticketId} not found`, HttpStatus.INTERNAL_SERVER_ERROR)
 
       if (type == deleteType.soft) {
         return await this.ticketRepository.softRemove(ticket)

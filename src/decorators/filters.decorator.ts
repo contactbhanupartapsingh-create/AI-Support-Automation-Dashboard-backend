@@ -8,6 +8,10 @@ export const Filters = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const query = request.query;
 
+    // if (query.status) {
+    //   query.status = Array.isArray(query.status) ? query.status : [query.status];
+    // }
+
     const dto = plainToInstance(FilterQueryDto,query)
 
     const errors = validateSync(dto);

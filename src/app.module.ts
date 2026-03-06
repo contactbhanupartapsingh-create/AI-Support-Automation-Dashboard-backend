@@ -17,29 +17,30 @@ import { RouterModule } from '@nestjs/core';
       envFilePath: '.development.env', // Load environment variables from .env file
       isGlobal: true, // Make ConfigModule available globally
     }),
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   // Railway provides the full URL, which is the easiest way to connect
-    //   url: process.env.DATABASE_URL, 
-    //   autoLoadEntities: true,
-    //   synchronize: true, // Set to false in production usually!
-    //   ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
-    // }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        entities: [User, Ticket],
-        type: 'postgres', 
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
+    process.env.DATABASE_URL ?
+      TypeOrmModule.forRoot({
+        type: 'postgres',
+        // Railway provides the full URL, which is the easiest way to connect
+        url: process.env.DATABASE_URL,
         autoLoadEntities: true,
-        synchronize: true, 
+        synchronize: true, // Set to false in production usually!
+        ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+      }) :
+      TypeOrmModule.forRootAsync({
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          entities: [User, Ticket],
+          type: 'postgres',
+          host: configService.get<string>('DB_HOST'),
+          port: configService.get<number>('DB_PORT'),
+          username: configService.get<string>('DB_USERNAME'),
+          password: configService.get<string>('DB_PASSWORD'),
+          database: configService.get<string>('DB_DATABASE'),
+          autoLoadEntities: true,
+          synchronize: true,
+        }),
       }),
-    }),
     UserModule,
     AuthModule,
     TicketModule
@@ -47,7 +48,7 @@ import { RouterModule } from '@nestjs/core';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule{
+export class AppModule implements NestModule {
   configure(consumer: any) {
     consumer.apply(LoggerMiddleware).forRoutes('*');
   }

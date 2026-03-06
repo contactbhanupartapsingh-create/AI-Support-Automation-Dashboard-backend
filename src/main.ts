@@ -11,6 +11,7 @@ async function bootstrap() {
     enableImplicitConversion: true, // Recommended for Enums/Numbers
   },
 }));
+console.log("FORCE DEPLOY CHECK #1");
 await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 console.log(`Application is running on: ${await app.getUrl()}`);
 }

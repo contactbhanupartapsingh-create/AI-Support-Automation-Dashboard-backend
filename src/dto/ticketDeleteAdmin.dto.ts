@@ -1,5 +1,5 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional} from "class-validator";
-import { deleteType } from "src/static";
+import { IsEnum, IsOptional} from "class-validator";
+import { deleteType } from "src/common/enums";
 
 export class TicketDeleteAdminDto {
     @IsEnum(deleteType)

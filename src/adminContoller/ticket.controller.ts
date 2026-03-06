@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpException, Patch, Query, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, HttpException, Param, Patch, Query, UseGuards } from "@nestjs/common";
 import { Filters } from "src/decorators/filters.decorator";
 import { Pagination } from "src/decorators/pagination.decorator";
 import { Roles } from "src/decorators/roles.decorator";
@@ -7,7 +7,6 @@ import { FilterQueryDto } from "src/dto/filterQuery.dto";
 import { TicketResponseDto } from "src/dto/getTicketResponse.dto";
 import { PaginationQueryDto } from "src/dto/paginationQuery.dto";
 import { TicketDeleteAdminDto } from "src/dto/ticketDeleteAdmin.dto";
-import { TicketRestoreDto } from "src/dto/ticketRestore.dto";
 import { Ticket } from "src/entity/ticket.entity";
 import { AuthGuard } from "src/guards/auth.guard";
 import { RoleGuard } from "src/guards/role.guard";
@@ -22,7 +21,7 @@ export class AdminTicketController {
     private readonly ticketService: TicketService
   ) { }
 
-  @Get('all')
+  @Get()
   async getAllTickets(
     @Filters() filters: FilterQueryDto, 
     @Pagination() paginationQuery : PaginationQueryDto
@@ -34,23 +33,24 @@ export class AdminTicketController {
     }
   }
 
-  @Delete('delete')
+  @Delete(':id')
   async deleteTicket(
+    @Param('id') ticketId: number,
     @TicketDecorator('body') deleteData: TicketDeleteAdminDto
   ): Promise<Ticket> {
     try {
-      return await this.ticketService.deleteTicketByAdmin(deleteData)
+      return await this.ticketService.deleteTicketByAdmin(deleteData, ticketId)
     } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  @Patch('restore')
+  @Patch(':id/restore')
   async restoreTicket(
-    @TicketDecorator('body') restoreData: TicketRestoreDto
+    @Param('id') ticketId: number
   ): Promise<Ticket | null> {
     try {
-      return await this.ticketService.restoreTicket(restoreData.id)
+      return await this.ticketService.restoreTicket(ticketId)
     } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }

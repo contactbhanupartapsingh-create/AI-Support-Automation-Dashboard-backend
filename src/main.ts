@@ -11,6 +11,7 @@ async function bootstrap() {
     enableImplicitConversion: true, // Recommended for Enums/Numbers
   },
 }));
+  console.log(process.env.PORT,'this is port for public forwarding')
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

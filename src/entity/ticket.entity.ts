@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, DeleteDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, DeleteDateColumn, UpdateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { TicketStatus } from 'src/common/enums';
 
@@ -22,9 +22,9 @@ export class Ticket {
   @CreateDateColumn({type:'timestamptz'})
   createdAt: Date
 
-  @CreateDateColumn({type:'timestamptz'})
+  @UpdateDateColumn({type:'timestamptz'})
   updatedAt: Date
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({type:'timestamptz'})
   deletedAt: Date;
 }

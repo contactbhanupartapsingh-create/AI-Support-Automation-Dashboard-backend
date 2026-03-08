@@ -24,10 +24,10 @@ export class TicketService {
     sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
     const { skip, limit, page } = paginationQuery
-    const { status } = filters
+    const { status, getDeleted } = filters
     const { sortBy = TicketSortFields.CREATED_AT, order = SortOrder.DESC } = sortFilters
-    const getDeleted = true
     return await this.ticketRepository.findAndCount({
+      withDeleted: getDeleted,
       where: {
         user: { id: user.id },
         deletedAt: getDeleted ? Not(IsNull()) : IsNull()
@@ -42,6 +42,7 @@ export class TicketService {
       take: limit,
       skip
     }).then(async (data) => {
+      console.log(data,'ssnksl')
       return {
         'tickets': data[0],
         'meta': {
@@ -84,7 +85,7 @@ export class TicketService {
       })
 
       if (!ticket) throw new HttpException(`ticket id: ${ticketId}not found`, HttpStatus.INTERNAL_SERVER_ERROR)
-
+        console.log(ticket.user.id, userId,'dndjdk')
       if (ticket.user.id != userId) throw new HttpException(` user not authorized to access this ticket`, HttpStatus.UNAUTHORIZED)
 
       ticket.title = title ?? ticket.title

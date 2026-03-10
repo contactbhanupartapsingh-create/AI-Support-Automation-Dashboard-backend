@@ -12,6 +12,8 @@ export class PaginationQueryDto {
     @Transform(({value}) => value ?? 10)
     limit: number;
 
+    search: string
+
     // calculated in pagination decorator so that user should not able to set value of skip
     skip: number
 }

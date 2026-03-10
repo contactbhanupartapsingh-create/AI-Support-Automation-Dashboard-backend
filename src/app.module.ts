@@ -9,7 +9,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AuthModule } from './modules/auth.module';
 import { Ticket } from './entity/ticket.entity';
 import { TicketModule } from './modules/ticket.module';
-import { RouterModule } from '@nestjs/core';
+import { AddSearchVectorToTickets123456789 } from './migrations/AddSearchVectorToTickets123456789';
 
 @Module({
   imports: [
@@ -39,6 +39,8 @@ import { RouterModule } from '@nestjs/core';
           database: configService.get<string>('DB_DATABASE'),
           autoLoadEntities: true,
           synchronize: true,
+          migrationsRun: true,
+          migrations:[AddSearchVectorToTickets123456789]
         }),
       }),
     UserModule,

@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class AddSearchVectorToTickets123456789 implements MigrationInterface {
+export class AddSearchVectorToTickets1773160411046 implements MigrationInterface {
     
     public async up(queryRunner: QueryRunner): Promise<void> {
         // 1. Create the tsvector column with weights

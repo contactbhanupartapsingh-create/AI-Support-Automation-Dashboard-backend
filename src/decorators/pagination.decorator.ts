@@ -11,13 +11,13 @@ export const Pagination = createParamDecorator(
     
     const page = parseInt(query?.page) || 1;
     const limit = parseInt(query?.limit) || 10;
-    console.log(page, limit,'dbjdkd')
     const skip = (page - 1) * limit;
 
     const dto = plainToInstance(PaginationQueryDto,{
       page,
       limit,
       skip,
+      search: query?.search ?? null
     })
 
     const errors = validateSync(dto);

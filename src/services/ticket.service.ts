@@ -38,17 +38,23 @@ export class TicketService {
     if (getDeleted) queryBuilder.withDeleted().andWhere('ticket.deletedAt IS NOT NULL')
     if (status && status.length) queryBuilder.andWhere('ticket.status IN (:...status)', { status })
 
-
     // apply sort filters and search
     if (search) {
+      const prefixSearch = search
+        .trim()
+        .split(/\s+/)
+        .filter(word => word.length > 0)
+        .map(word => `${word}:*`)
+        .join(' & ');
       queryBuilder.andWhere(
-        "ticket.searchVector @@ websearch_to_tsquery('english', :search)",
-        { search }
+        "ticket.searchVector @@ to_tsquery('english', :search)",
+        { search: prefixSearch }
       );
-      queryBuilder.orderBy(
-        "ts_rank(ticket.searchVector, websearch_to_tsquery('english', :search))",
-        "DESC"
+      queryBuilder.addSelect(
+        "ts_rank(ticket.searchVector, to_tsquery('english', :search))",
+        "rank"
       );
+      queryBuilder.orderBy("rank", "DESC");
     } else {
       queryBuilder.orderBy(`ticket.${sortBy}`, order)
     }
@@ -150,25 +156,49 @@ export class TicketService {
     paginationQuery: PaginationQueryDto,
     sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
-    const { page, limit, skip } = paginationQuery
+    const { page, limit, skip, search } = paginationQuery
     const { getDeleted, status } = filters
     const { sortBy = TicketSortFields.CREATED_AT, order = SortOrder.DESC } = sortFilters
+
+    const queryBuilder = this.ticketRepository.createQueryBuilder('ticket')
+
+    // filters
+    if (getDeleted) queryBuilder.withDeleted()
+    if (status && status.length) queryBuilder.andWhere('ticket.status IN (:...status)', { status })
+
+    // order and search
+    if (search) {
+      const prefixSearch = search
+        .trim()
+        .split(/\s+/)
+        .filter(word => word.length > 0)
+        .map(word => `${word}:*`)
+        .join(' & ');
+      queryBuilder.andWhere(
+        "ticket.searchVector @@ to_tsquery('english', :search)",
+        { search: prefixSearch }
+      );
+      queryBuilder.addSelect(
+        "ts_rank(ticket.searchVector, to_tsquery('english', :search))",
+        "rank"
+      );
+      queryBuilder.orderBy("rank", "DESC");
+    } else {
+      queryBuilder.orderBy(`ticket.${sortBy}`, order)
+    }
+
+
     try {
-      const tickets = await this.ticketRepository.findAndCount({
-        withDeleted: getDeleted,
-        ...(status && { status: In(status) }),
-        order: {
-          [sortBy]: order
-        },
-        take: limit,
-        skip,
-      })
+      const [tickets, totalItems] = await queryBuilder
+        .take(limit)
+        .skip(skip)
+        .getManyAndCount()
 
       return {
-        'tickets': tickets[0],
+        tickets,
         'meta': {
-          'totalItems': tickets[1],
-          'totalPages': Math.ceil(tickets[1] / limit),
+          'totalItems': totalItems,
+          'totalPages': Math.ceil(totalItems / limit),
           'currentPage': page,
           'sortBy': sortBy,
           'order': order,

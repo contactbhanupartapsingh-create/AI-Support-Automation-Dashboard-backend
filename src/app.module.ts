@@ -9,7 +9,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AuthModule } from './modules/auth.module';
 import { Ticket } from './entity/ticket.entity';
 import { TicketModule } from './modules/ticket.module';
-import { AddSearchVectorToTickets123456789 } from './migrations/AddSearchVectorToTickets123456789';
+import { AddSearchVectorToTickets1773160411046 } from './migrations/AddSearchVectorToTickets1773160411046';
 
 @Module({
   imports: [
@@ -38,9 +38,9 @@ import { AddSearchVectorToTickets123456789 } from './migrations/AddSearchVectorT
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_DATABASE'),
           autoLoadEntities: true,
-          synchronize: true,
+          synchronize: false,
           migrationsRun: true,
-          migrations:[AddSearchVectorToTickets123456789]
+          migrations:[AddSearchVectorToTickets1773160411046]
         }),
       }),
     UserModule,

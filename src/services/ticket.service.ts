@@ -2,7 +2,7 @@ import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { deleteType, HttpStatus, SortOrder, TicketSortFields } from 'src/common/enums';
 import { Ticket } from 'src/entity/ticket.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Not, Repository } from 'typeorm';
+import { In, IsNull, Not, QueryBuilder, Repository } from 'typeorm';
 import { User } from 'src/entity/user.entity';
 import { TicketCreateDto } from 'src/dto/ticketCreate.dto';
 import { TicketDeleteAdminDto } from 'src/dto/ticketDeleteAdmin.dto';
@@ -23,39 +23,64 @@ export class TicketService {
     filters: FilterQueryDto,
     sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
-    const { skip, limit, page } = paginationQuery
-    const { status } = filters
+    const { skip, limit, page, search } = paginationQuery
+    const { status, getDeleted } = filters
     const { sortBy = TicketSortFields.CREATED_AT, order = SortOrder.DESC } = sortFilters
-    const getDeleted = true
-    return await this.ticketRepository.findAndCount({
-      where: {
-        user: { id: user.id },
-        deletedAt: getDeleted ? Not(IsNull()) : IsNull()
-      },
-      ...(status && { status: In(status) }),
-      relations: {
-        user: true
-      },
-      order: {
-        [sortBy]: order
-      },
-      take: limit,
-      skip
-    }).then(async (data) => {
+
+    const queryBuilder = this.ticketRepository.createQueryBuilder('ticket')
+
+    // apply relations
+    queryBuilder.leftJoinAndSelect(`ticket.user`, 'user')
+      .where(`user.id = :userId`, { userId: user.id })
+
+
+    // apply filters
+    if (getDeleted) queryBuilder.withDeleted().andWhere('ticket.deletedAt IS NOT NULL')
+    if (status && status.length) queryBuilder.andWhere('ticket.status IN (:...status)', { status })
+
+    // apply sort filters and search
+    if (search) {
+      const prefixSearch = search
+        .trim()
+        .split(/\s+/)
+        .filter(word => word.length > 0)
+        .map(word => `${word}:*`)
+        .join(' & ');
+      queryBuilder.andWhere(
+        "ticket.searchVector @@ to_tsquery('english', :search)",
+        { search: prefixSearch }
+      );
+      queryBuilder.addSelect(
+        "ts_rank(ticket.searchVector, to_tsquery('english', :search))",
+        "rank"
+      );
+      queryBuilder.orderBy("rank", "DESC");
+    } else {
+      queryBuilder.orderBy(`ticket.${sortBy}`, order)
+    }
+
+
+    try {
+      // with pagination
+      const [tickets, totalItems] = await queryBuilder
+        .take(limit)
+        .skip(skip)
+        .getManyAndCount();
+
       return {
-        'tickets': data[0],
+        tickets,
         'meta': {
-          'totalItems': data[1],
-          'totalPages': Math.ceil(data[1] / limit),
+          'totalItems': totalItems,
+          'totalPages': Math.ceil(totalItems / limit),
           'currentPage': page,
           'sortBy': sortBy,
           'order': order,
           'filters': filters
         }
       }
-    }).catch((err) => {
+    } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
-    })
+    }
   }
 
   async createTicketForUser(user: User, ticketData: TicketCreateDto): Promise<Ticket> {
@@ -84,7 +109,7 @@ export class TicketService {
       })
 
       if (!ticket) throw new HttpException(`ticket id: ${ticketId}not found`, HttpStatus.INTERNAL_SERVER_ERROR)
-
+      console.log(ticket.user.id, userId, 'dndjdk')
       if (ticket.user.id != userId) throw new HttpException(` user not authorized to access this ticket`, HttpStatus.UNAUTHORIZED)
 
       ticket.title = title ?? ticket.title
@@ -131,25 +156,49 @@ export class TicketService {
     paginationQuery: PaginationQueryDto,
     sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
-    const { page, limit, skip } = paginationQuery
+    const { page, limit, skip, search } = paginationQuery
     const { getDeleted, status } = filters
     const { sortBy = TicketSortFields.CREATED_AT, order = SortOrder.DESC } = sortFilters
+
+    const queryBuilder = this.ticketRepository.createQueryBuilder('ticket')
+
+    // filters
+    if (getDeleted) queryBuilder.withDeleted()
+    if (status && status.length) queryBuilder.andWhere('ticket.status IN (:...status)', { status })
+
+    // order and search
+    if (search) {
+      const prefixSearch = search
+        .trim()
+        .split(/\s+/)
+        .filter(word => word.length > 0)
+        .map(word => `${word}:*`)
+        .join(' & ');
+      queryBuilder.andWhere(
+        "ticket.searchVector @@ to_tsquery('english', :search)",
+        { search: prefixSearch }
+      );
+      queryBuilder.addSelect(
+        "ts_rank(ticket.searchVector, to_tsquery('english', :search))",
+        "rank"
+      );
+      queryBuilder.orderBy("rank", "DESC");
+    } else {
+      queryBuilder.orderBy(`ticket.${sortBy}`, order)
+    }
+
+
     try {
-      const tickets = await this.ticketRepository.findAndCount({
-        withDeleted: getDeleted,
-        ...(status && { status: In(status) }),
-        order: {
-          [sortBy]: order
-        },
-        take: limit,
-        skip,
-      })
+      const [tickets, totalItems] = await queryBuilder
+        .take(limit)
+        .skip(skip)
+        .getManyAndCount()
 
       return {
-        'tickets': tickets[0],
+        tickets,
         'meta': {
-          'totalItems': tickets[1],
-          'totalPages': Math.ceil(tickets[1] / limit),
+          'totalItems': totalItems,
+          'totalPages': Math.ceil(totalItems / limit),
           'currentPage': page,
           'sortBy': sortBy,
           'order': order,

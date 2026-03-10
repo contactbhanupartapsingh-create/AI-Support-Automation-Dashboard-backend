@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, DeleteDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, DeleteDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { User } from './user.entity';
 import { TicketStatus } from 'src/common/enums';
 
@@ -13,18 +13,27 @@ export class Ticket {
   @Column()
   description: string;
 
-  @Column({default: TicketStatus.OPEN})
+  @Column({ default: TicketStatus.OPEN })
   status: TicketStatus;
-  
+
   @ManyToOne(() => User, user => user.tickets)
   user: User;
-  
-  @CreateDateColumn({type:'timestamptz'})
+
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date
 
-  @CreateDateColumn({type:'timestamptz'})
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ type: 'timestamptz' })
   deletedAt: Date;
+
+  @Column({
+    type: 'tsvector',
+    select: false, 
+    insert: false, 
+    update: false, 
+  })
+  searchVector: any;
+
 }

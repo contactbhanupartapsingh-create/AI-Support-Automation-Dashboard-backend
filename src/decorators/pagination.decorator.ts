@@ -8,14 +8,16 @@ export const Pagination = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const query = request.query;
 
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
+    
+    const page = parseInt(query?.page) || 1;
+    const limit = parseInt(query?.limit) || 10;
     const skip = (page - 1) * limit;
 
     const dto = plainToInstance(PaginationQueryDto,{
       page,
       limit,
       skip,
+      search: query?.search ?? null
     })
 
     const errors = validateSync(dto);

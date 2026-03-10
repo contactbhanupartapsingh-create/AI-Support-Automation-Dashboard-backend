@@ -9,7 +9,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AuthModule } from './modules/auth.module';
 import { Ticket } from './entity/ticket.entity';
 import { TicketModule } from './modules/ticket.module';
-import { RouterModule } from '@nestjs/core';
+import { AddSearchVectorToTickets1773160411046 } from './migrations/AddSearchVectorToTickets1773160411046';
 
 @Module({
   imports: [
@@ -38,7 +38,9 @@ import { RouterModule } from '@nestjs/core';
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_DATABASE'),
           autoLoadEntities: true,
-          synchronize: true,
+          synchronize: false,
+          migrationsRun: true,
+          migrations:[AddSearchVectorToTickets1773160411046]
         }),
       }),
     UserModule,

@@ -20,52 +20,53 @@ import { SortQueryDto } from 'src/dto/sortQuery.dto';
 @UseGuards(AuthGuard)
 @Controller('/ticket')
 export class TicketController {
-    constructor(
-      private readonly ticketService: TicketService
-    ) {}
+  constructor(
+    private readonly ticketService: TicketService
+  ) { }
 
   @Get()
   async getUserTickets(
-    @UserDecorator(['user']) user: User, 
+    @UserDecorator(['user']) user: User,
     @Pagination() paginationQuery: PaginationQueryDto,
     @Filters() filters: FilterQueryDto,
     @Sort() sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
     try {
-        return await this.ticketService.getUserTickets(
-          user, 
-          paginationQuery, 
-          filters, 
-          sortFilters
-        )
-    }catch(err){
-        throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+      return await this.ticketService.getUserTickets(
+        user,
+        paginationQuery,
+        filters,
+        sortFilters
+      )
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Get('trash')
   async getTrashTicketsByUser(
-    @UserDecorator(['user']) user: User, 
+    @UserDecorator(['user']) user: User,
     @Pagination() paginationQuery: PaginationQueryDto,
     @Filters() filters: FilterQueryDto,
     @Sort() sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
     try {
-        return await this.ticketService.getUserTickets(user, paginationQuery, filters, sortFilters)
-    }catch(err){
-        throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+      filters.getDeleted = true
+      return await this.ticketService.getUserTickets(user, paginationQuery, filters, sortFilters)
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Post()
   async createTicket(
-    @UserDecorator(['user']) user: User,  
+    @UserDecorator(['user']) user: User,
     @TicketDecorator('body') ticketData: TicketCreateDto
-  ) : Promise<Ticket> {
+  ): Promise<Ticket> {
     try {
-        return await this.ticketService.createTicketForUser(user, ticketData)
-    }catch(err){
-        throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+      return await this.ticketService.createTicketForUser(user, ticketData)
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -73,11 +74,11 @@ export class TicketController {
   async updateTicket(
     @Param('id') ticketId: number,
     @UserDecorator(['id']) userId: number,
-    @TicketDecorator('body') updateData: TicketUpdateDto 
-  ) : Promise<Ticket> {
-    try{
+    @TicketDecorator('body') updateData: TicketUpdateDto
+  ): Promise<Ticket> {
+    try {
       return await this.ticketService.updateTicket(userId, ticketId, updateData)
-    }catch(err){
+    } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -86,26 +87,25 @@ export class TicketController {
   async changeStatus(
     @Param('id') ticketId: number,
     @UserDecorator(['id']) userId: number,
-    @TicketDecorator('body') ticketStatus: TicketChangeStatusDto 
-  ) : Promise<Ticket> {
-    try{
+    @TicketDecorator('body') ticketStatus: TicketChangeStatusDto
+  ): Promise<Ticket> {
+    try {
       const status: TicketStatus = ticketStatus.status
-      const updateData: TicketUpdateDto = {status}
-      return await this.ticketService.updateTicket(userId, ticketId,  updateData)
-    }catch(err){
+      const updateData: TicketUpdateDto = { status }
+      return await this.ticketService.updateTicket(userId, ticketId, updateData)
+    } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Delete(':id')
   async deleteTicket(
-    @Param('id') ticketId : number,
-    @UserDecorator(['id']) userData : {id:number}
-  ) : Promise<Ticket> {
-    try{
-      const {id:userId} = userData
-      return await this.ticketService.deleteTicket( userId, ticketId)
-    }catch(err){
+    @Param('id') ticketId: number,
+    @UserDecorator(['id']) userId: number
+  ): Promise<Ticket> {
+    try {
+      return await this.ticketService.deleteTicket(userId, ticketId)
+    } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

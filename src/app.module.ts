@@ -10,6 +10,8 @@ import { AuthModule } from './modules/auth.module';
 import { Ticket } from './entity/ticket.entity';
 import { TicketModule } from './modules/ticket.module';
 import { AddSearchVectorToTickets1773160411046 } from './migrations/AddSearchVectorToTickets1773160411046';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
@@ -20,10 +22,9 @@ import { AddSearchVectorToTickets1773160411046 } from './migrations/AddSearchVec
     process.env.DATABASE_URL ?
       TypeOrmModule.forRoot({
         type: 'postgres',
-        // Railway provides the full URL, which is the easiest way to connect
         url: process.env.DATABASE_URL,
         autoLoadEntities: true,
-        synchronize: true, // Set to false in production usually!
+        synchronize: true,
         ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
       }) :
       TypeOrmModule.forRootAsync({
@@ -43,6 +44,21 @@ import { AddSearchVectorToTickets1773160411046 } from './migrations/AddSearchVec
           migrations:[AddSearchVectorToTickets1773160411046]
         }),
       }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        store: await redisStore({
+          socket: {
+            host: configService.get('REDIS_HOST'),
+            port: configService.get('REDIS_PORT'),
+          },
+          password: configService.get('REDIS_PASSWORD'), 
+          ttl: 60000,
+        }),
+      }),
+      inject: [ConfigService],
+    }),
     UserModule,
     AuthModule,
     TicketModule

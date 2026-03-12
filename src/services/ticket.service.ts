@@ -1,8 +1,8 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { deleteType, HttpStatus, SortOrder, TicketSortFields } from 'src/common/enums';
 import { Ticket } from 'src/entity/ticket.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Not, QueryBuilder, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from 'src/entity/user.entity';
 import { TicketCreateDto } from 'src/dto/ticketCreate.dto';
 import { TicketDeleteAdminDto } from 'src/dto/ticketDeleteAdmin.dto';
@@ -11,10 +11,17 @@ import { TicketResponseDto } from 'src/dto/getTicketResponse.dto';
 import { FilterQueryDto } from 'src/dto/filterQuery.dto';
 import { TicketUpdateDto } from 'src/dto/ticketUpdate.dto';
 import { SortQueryDto } from 'src/dto/sortQuery.dto';
+import { generateCacheKey } from 'src/common/functions';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CacheService } from './cache.service';
 
 @Injectable()
 export class TicketService {
   @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>
+  constructor(
+    private readonly cacheService: CacheService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
+  ) { }
 
 
   async getUserTickets(
@@ -23,6 +30,18 @@ export class TicketService {
     filters: FilterQueryDto,
     sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
+
+    const userId = user.id
+    const cachedResponse = await this.cacheService.validateResponse(
+      {
+        userId,
+        paginationQuery,
+        filters,
+        sortFilters
+      }
+    )
+    if (cachedResponse) return cachedResponse
+
     const { skip, limit, page, search } = paginationQuery
     const { status, getDeleted } = filters
     const { sortBy = TicketSortFields.CREATED_AT, order = SortOrder.DESC } = sortFilters
@@ -67,7 +86,7 @@ export class TicketService {
         .skip(skip)
         .getManyAndCount();
 
-      return {
+      const response = {
         tickets,
         'meta': {
           'totalItems': totalItems,
@@ -78,6 +97,15 @@ export class TicketService {
           'filters': filters
         }
       }
+
+      await this.cacheManager.set(generateCacheKey(
+        userId,
+        paginationQuery,
+        filters,
+        sortFilters
+      ), response)
+
+      return response
     } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -89,7 +117,10 @@ export class TicketService {
       user: user
     })
     try {
-      return await this.ticketRepository.save(newTicket)
+      const ticket = await this.ticketRepository.save(newTicket)
+      const userId = user.id
+      await this.cacheService.invalidateTickets({userId})
+      return ticket
     } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -109,7 +140,7 @@ export class TicketService {
       })
 
       if (!ticket) throw new HttpException(`ticket id: ${ticketId}not found`, HttpStatus.INTERNAL_SERVER_ERROR)
-      console.log(ticket.user.id, userId, 'dndjdk')
+      
       if (ticket.user.id != userId) throw new HttpException(` user not authorized to access this ticket`, HttpStatus.UNAUTHORIZED)
 
       ticket.title = title ?? ticket.title
@@ -117,6 +148,7 @@ export class TicketService {
       ticket.status = status ?? ticket.status
 
       this.ticketRepository.save(ticket)
+      await this.cacheService.invalidateTickets({userId})
 
       return ticket
 
@@ -141,6 +173,7 @@ export class TicketService {
 
       if (ticket.deletedAt) throw new HttpException(`ticket with id: ${ticketId} is already deleted`, HttpStatus.INTERNAL_SERVER_ERROR)
 
+      await this.cacheService.invalidateTickets({userId})
       return await this.ticketRepository.softRemove(ticket)
 
     } catch (err) {
@@ -156,6 +189,17 @@ export class TicketService {
     paginationQuery: PaginationQueryDto,
     sortFilters: SortQueryDto
   ): Promise<TicketResponseDto> {
+    const userId = 0
+    const cachedResponse = await this.cacheService.validateResponse(
+      {
+        userId,
+        paginationQuery,
+        filters,
+        sortFilters
+      }
+    )
+    if (cachedResponse) return cachedResponse
+
     const { page, limit, skip, search } = paginationQuery
     const { getDeleted, status } = filters
     const { sortBy = TicketSortFields.CREATED_AT, order = SortOrder.DESC } = sortFilters
@@ -194,7 +238,7 @@ export class TicketService {
         .skip(skip)
         .getManyAndCount()
 
-      return {
+      const response = {
         tickets,
         'meta': {
           'totalItems': totalItems,
@@ -205,6 +249,15 @@ export class TicketService {
           'filters': filters
         }
       }
+
+      await this.cacheManager.set(generateCacheKey(
+            0,
+            paginationQuery,
+            filters,
+            sortFilters
+        ), response)
+
+      return response
     } catch (err) {
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -227,6 +280,8 @@ export class TicketService {
         id: ticketId
       })
 
+      const userId = ticket[0].user.id
+      await this.cacheService.invalidateTickets({userId})
       return await this.ticketRepository.findOneBy({ id: ticketId })
 
     } catch (err) {
@@ -244,10 +299,14 @@ export class TicketService {
 
       if (!ticket) throw new HttpException(`ticket id: ${ticketId} not found`, HttpStatus.INTERNAL_SERVER_ERROR)
 
+      const userId = 0
       if (type == deleteType.soft) {
-        return await this.ticketRepository.softRemove(ticket)
+        const response = await this.ticketRepository.softRemove(ticket)
+        await this.cacheService.invalidateTickets({userId})
+        return response
       } else {
         this.ticketRepository.remove(ticket)
+        await this.cacheService.invalidateTickets({userId})
         return ticket;
       }
     } catch (err) {
